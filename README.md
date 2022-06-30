@@ -2,7 +2,6 @@
 
 ## 引用
 
-如果你在研究中使用了本项目的代码或者性能基准，请参考如下 bibtex 引用 MMDetection。
 
 ```
 @article{mmdetection,
