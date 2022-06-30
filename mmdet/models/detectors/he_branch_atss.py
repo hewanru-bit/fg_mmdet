@@ -46,16 +46,16 @@ class HEBHATSS(HEbaseOneDetector):
             #     edge.append(self.f[i](edge_imgs[i]))
             # edge_imgs=edge
 
-        # 将经过分支的结果采样到与x相同的尺寸
-        assert len(x)==len(edge_imgs) ,'len(x)!=len(edge_imgs)'
-        # for i in range(len(x)):
-        #     x_shape = x[i ].shape[2:]
-        #     edge_imgs[i] = F.interpolate(edge_imgs[i], size=x_shape)
-        # # # 把backbone的结果和提取边缘经过dehaze_model的结果之间相加
-        y=[0.9*x[i]+0.1*edge_imgs[i] for i in range(len(x))]
+            # 将经过分支的结果采样到与x相同的尺寸
+            assert len(x)==len(edge_imgs) ,'len(x)!=len(edge_imgs)'
+            # for i in range(len(x)):
+            #     x_shape = x[i ].shape[2:]
+            #     edge_imgs[i] = F.interpolate(edge_imgs[i], size=x_shape)
+            # # # 把backbone的结果和提取边缘经过dehaze_model的结果之间相加
+            x=[0.9*x[i]+0.1*edge_imgs[i] for i in range(len(x))]
 
         if self.with_neck:
-            x = self.neck(y)
+            x = self.neck(x)
         return x
 
     def forward_dummy(self, img):

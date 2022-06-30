@@ -28,6 +28,7 @@ def parse_args():
     # '--config', default='/home/tju531/hwr/mmdetection/configs/dyhead/atss_r50_fpn_dyhead_1x_coco.py',
                         help='train config file path')
     parser.add_argument('--work-dir',
+                        default='/home/tju531/hwr/mmdet_work/2_atss_branch_re18',
                         help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from',

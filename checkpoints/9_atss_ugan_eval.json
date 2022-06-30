@@ -1,1 +1,0 @@
-{"config": "configs/uw_enhance_influence/atss_r50/9_ugan_atss_r50_fpn_1x_uwdet_coco.py", "metric": {"bbox_mAP": 0.405, "bbox_mAP_50": 0.768, "bbox_mAP_75": 0.379, "bbox_mAP_s": 0.182, "bbox_mAP_m": 0.376, "bbox_mAP_l": 0.465, "bbox_mAP_copypaste": "0.405 0.768 0.379 0.182 0.376 0.465"}}

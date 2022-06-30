@@ -35,21 +35,17 @@ def test_anchor_head_loss():
         dict(
             in_channels=(1, 256, 256, 512, 1024),
             out_channels=(256, 256, 512, 1024, 2048),
-            num_convm=5,  ####构造5个CONVM
-            out_indices=(1, 2, 3, 4),  ###输出个数
-            strides=(1, 1, 2, 2, 2),
-            kernel_size=(1, 3, 3, 3, 3),
-            padding=(1, 1, 1, 1, 1),
-            bias=(True, True, True, True, True),
-            act_cfg=dict(type='ReLU'),
+            num_block=5,  ####构造5个CONVM
+            out_indices=(1, 2, 3, 4),  ###输出层数从0开始
             plugins=None,
             pretrained=None,
-            init_cfg=None,
-            norm_eval=False,
-            init_weights=True))
+            downsample=True,
+            init_cfg=dict(type='Normal', layer='Conv2d', std=0.01),
+            norm_eval=False
+        ))
     self = CONVMNet(**cfg)
 
-    x = torch.rand(2,1,256,256)
+    x = torch.rand(1,1,40,60)
     cls_scores = self.forward(x)
-    print(cls_scores.shape)
+    print(len(cls_scores))
 

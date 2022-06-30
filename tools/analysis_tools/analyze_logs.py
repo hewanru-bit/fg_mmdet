@@ -76,6 +76,7 @@ def plot_curve(log_dicts, args):
                 ax.set_xticks(xs)
                 plt.xlabel('epoch')
                 plt.plot(xs, ys, label=legend[i * num_metrics + j], marker='o')
+                # plt.text(xs, ys,'%.0f' % ys,fontdict={'fontsize':14})
             else:
                 xs = []
                 ys = []
@@ -93,6 +94,7 @@ def plot_curve(log_dicts, args):
                 plt.plot(
                     xs, ys, label=legend[i * num_metrics + j], linewidth=0.5)
             plt.legend()
+
         if args.title is not None:
             plt.title(args.title)
     if args.out is None:
@@ -110,13 +112,13 @@ def add_plot_parser(subparsers):
         '--json_logs',
         type=str,
         nargs='+',
-        default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/atss_r50_fpn_1x_fgvoc/20220602_095819.log.json',
+        default='/home/tju531/hwr/mmdet_work/work_dirs/atss_r50_fpn_1x_fgvoc/20220602_095819.log.json',
         help='path of train log in json format')
     parser_plt.add_argument(
         '--keys',
         type=str,
         nargs='+',
-        default=['loss'],  ####也可以是mAP
+        default=['mAP'],  ####也可以是mAP
         help='the metric that you want to plot')
     parser_plt.add_argument(
         '--start-epoch',
@@ -133,7 +135,7 @@ def add_plot_parser(subparsers):
         '--legend',
         type=str,
         nargs='+',
-        default=['loss'],
+        default=['mAP'],
         help='legend of each plot')
     parser_plt.add_argument(
         '--backend', type=str, default=None, help='backend of plt')
