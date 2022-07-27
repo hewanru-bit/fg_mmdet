@@ -48,7 +48,8 @@ from .hebase import HEbaseDetector
 from .he_baseone import HEbaseOneDetector
 from .he_atss import HEATSS
 from .he_branch_atss import HEBHATSS
-
+from .he_batss import BATSS
+from .he_catss import CATSS
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
     'KnowledgeDistillationSingleStageDetector', 'FastRCNN', 'FasterRCNN',
@@ -59,6 +60,6 @@ __all__ = [
     'DeformableDETR', 'AutoAssign', 'YOLOF', 'CenterNet', 'YOLOX',
     'TwoStagePanopticSegmentor', 'PanopticFPN', 'QueryInst', 'LAD', 'TOOD',
     'MaskFormer', 'Mask2Former','HEFasterRCNN','HEbaseDetector','HEATSS','HEbaseOneDetector',
-    'HEBHATSS'
+    'HEBHATSS','BATSS','CATSS'
 
 ]

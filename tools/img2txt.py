@@ -40,6 +40,6 @@ def img2txt(img_path,txt_path):
         txt_f.write(file_list[current_line] + '\n')  # 关闭文件
 
 
-img_path ='/home/tju531/hwr/Datasets/RESIDE/RTTS/train/'
-txt_path ='/home/tju531/hwr/Datasets/RESIDE/RTTS/train.txt'
+img_path ='/home/tju531/hwr/Datasets/uwdatasets/val/'
+txt_path ='/home/tju531/hwr/Datasets/uwdatasets/Imagesets/val.txt'
 img2txt(img_path,txt_path)

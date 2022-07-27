@@ -7,6 +7,7 @@ from .base_dehaze import BaseDehaze
 from mmcv.cnn import ConvModule
 from mmcv.cnn.bricks.activation import build_activation_layer
 from mmcv.utils.parrots_wrapper import _BatchNorm
+import torch.nn.functional as F
 
 @DEHAZEMODELS.register_module()
 class AODNet(BaseDehaze):
@@ -44,8 +45,9 @@ class AODNet(BaseDehaze):
                  pretrained=None,
                  init_cfg=None,
                  norm_eval=False,
+                 **kwargs
                  ):
-        super(AODNet, self).__init__(init_cfg=init_cfg)
+        super(AODNet, self).__init__(init_cfg=init_cfg,**kwargs)
 
         self.pretrained = pretrained
         assert not (init_cfg and pretrained), \
@@ -128,20 +130,29 @@ class AODNet(BaseDehaze):
                 padding=self.padding[i], bias=self.bias[i],act_cfg=self.act_cfg)
             self.CONVM.append(conv_act)
 
+        self.conv_1_1 = nn.Conv2d(256,1,3,1,1)
+
+    '''为了B系列，在fpn之后，head之前求loss,并不经过dehaze_model,把forward重写
+     只改变尺寸和求loss,新加一个卷积层conv_1_1来改变通道数'''
+
     def forward(self, x):
-        # 前两层正常经过，之后每一层与前一层 concat之后经过卷积层，最后一层将前面所有层的输出concat之后经过最后一层
-        outs=[]
-        x1=x
-        for i in range(self.num_stages):
-            if i>1 and i!=(self.num_stages-1):###i=2时，开始 concat
-                x1 = torch.cat((outs[i - 2], outs[i - 1]),1)
+        # # 前两层正常经过，之后每一层与前一层 concat之后经过卷积层，最后一层将前面所有层的输出concat之后经过最后一层
+        # outs=[]
+        # x1=x
+        # for i in range(self.num_stages):
+        #     if i>1 and i!=(self.num_stages-1):###i=2时，开始 concat
+        #         x1 = torch.cat((outs[i - 2], outs[i - 1]),1)
+        #
+        #     if i==self.num_stages-1:  #最后一层所有都拼接起来
+        #         x1= torch.cat([outs[j] for j in range(len(outs))],1)
+        #
+        #     x1 = self.CONVM[i](x1)  # x0,x1 正常经过卷积层
+        #     outs.append(x1)
+        # result = self.activate((outs[-1]*x)-outs[-1]+1)
 
-            if i==self.num_stages-1:  #最后一层所有都拼接起来
-                x1= torch.cat([outs[j] for j in range(len(outs))],1)
-
-            x1 = self.CONVM[i](x1)  # x0,x1 正常经过卷积层
-            outs.append(x1)
-        result = self.activate((outs[-1]*x)-outs[-1]+1)
+        '''为了B系列，在fpn之后，head之前求loss,并不经过dehaze_model,把forward重写
+             只改变尺寸和求loss,新加一个卷积层conv_1_1来改变通道数'''
+        result = self.conv_1_1(x) # 改变通道数
 
         return result
 
@@ -157,31 +168,62 @@ class AODNet(BaseDehaze):
                 if isinstance(m, _BatchNorm):
                     m.eval()
 
-
-    def loss(self, enhance_img, gt_img, img_metas):
-        if isinstance(self.loss_enhance, list):
+    def loss(self, dehaze_img, gt_img, img_metas):
+        if isinstance(self.loss_dehaze, list):
             losses = []
-            for loss_enhance in self.loss_enhance:
-                loss = loss_enhance(enhance_img, gt_img)
+            for loss_dehaze in self.loss_dehaze:
+                loss = loss_dehaze(dehaze_img, gt_img)
                 if isinstance(loss, tuple):
                     # Perceptual Loss
                     loss = loss[0]
                 losses.append(loss)
         else:
-            losses = self.loss_enhance(enhance_img, gt_img)
+            losses = self.loss_dehaze(dehaze_img, gt_img)
         if self.loss_perseptual is not None:
-            device = enhance_img.device
+            device = dehaze_img.device
             loss_perseptual = self.loss_perseptual.to(device)
-            perseptual_loss, style_loss = loss_perseptual(enhance_img, gt_img)
-            return dict(enhance_loss=losses, perseptual_loss=perseptual_loss)
+            perseptual_loss, style_loss = loss_perseptual(dehaze_img, gt_img)
+            return dict(branch_loss=losses, perseptual_loss=perseptual_loss)
         else:
-            return dict(enhance_loss=losses)
+            return dict(branch_loss=losses)
 
     def get_results(self, *args, **kwargs):
         pass
 
 
+    '''为了B系列，在fpn之后，head之前求loss,并不经过dehaze_model,把forward重写
+     只改变尺寸和求loss'''
+    def forward_train(self,
+                      img,
+                      img_metas,
+                      gt_img,
+                      return_dehaze_img=False,
+                      **kwargs):
+        """
+        Args:
+            img (Tensor): Features from FPN.
+            img_metas (list[dict]): Meta information of each image, e.g.,
+                image size, scaling factor, etc.
+            gt_img (Tensor): Ground truth images, has a shape
+                (num_gts, H, W).
 
+        Returns:
+            losses: (dict): A dictionary of loss components.
+        """
+        edge_img = self(img) # 改变了通道数
+        # 对gt_img下采样到edge_img 的尺寸
+        w, h = edge_img.size()[2:]
+        gt_img = F.interpolate(gt_img, size=(w, h))
+
+        assert gt_img is not None
+        assert edge_img.shape == gt_img.shape
+        losses = self.loss(
+            *(edge_img, ), gt_img=gt_img, img_metas=img_metas)
+
+        if return_dehaze_img:
+            return edge_img, losses
+        else:
+            return losses
 
 
 

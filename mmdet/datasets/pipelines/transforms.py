@@ -3,7 +3,7 @@ import copy
 import inspect
 import math
 import warnings
-
+import matplotlib.pyplot as plt
 import cv2
 import mmcv
 import numpy as np
@@ -238,6 +238,26 @@ class Resize:
             results['scale_factor'] = scale_factor
             results['keep_ratio'] = self.keep_ratio
 
+
+    def _resize_edge(self, results):
+        """Resize edge with ``results['scale']``."""
+        for key in results.get('edge_fields', ['edge']):
+            if self.keep_ratio:
+                img, scale_factor = mmcv.imrescale(
+                    results[key],
+                    results['scale'],
+                    return_scale=True,
+                    backend=self.backend)
+            else:
+                img, w_scale, h_scale = mmcv.imresize(
+                    results[key],
+                    results['scale'],
+                    return_scale=True,
+                    backend=self.backend)
+            img = np.expand_dims(img, axis=-1)
+            results[key] = img
+            results['edge_shape'] = img.shape
+
     def _resize_bboxes(self, results):
         """Resize bounding boxes with ``results['scale_factor']``."""
         for key in results.get('bbox_fields', []):
@@ -310,6 +330,8 @@ class Resize:
         self._resize_bboxes(results)
         self._resize_masks(results)
         self._resize_seg(results)
+        if results.get('edge_fields') is not None:
+            self._resize_edge(results)
         return results
 
     def __repr__(self):
@@ -561,6 +583,17 @@ class RandomShift:
                     = img[ori_y:ori_y + new_h, ori_x:ori_x + new_w]
                 results[key] = new_img
 
+            if results.get('edge_fields') is not None:
+                for key in results.get('edge_fields', ['edge']):
+                    img = results[key]
+                    new_img = np.zeros_like(img)
+                    img_h, img_w = img.shape[:2]
+                    new_h = img_h - np.abs(random_shift_y)
+                    new_w = img_w - np.abs(random_shift_x)
+                    new_img[new_y:new_y + new_h, new_x:new_x + new_w] \
+                        = img[ori_y:ori_y + new_h, ori_x:ori_x + new_w]
+                    results[key] = new_img
+
         return results
 
     def __repr__(self):
@@ -630,6 +663,22 @@ class Pad:
         results['pad_fixed_size'] = self.size
         results['pad_size_divisor'] = self.size_divisor
 
+    def _pad_edge(self, results):
+        """Pad images according to ``self.size``."""
+        pad_val = self.pad_val.get('img', 0)
+        for key in results.get('edge_fields', ['edge']):
+            if self.pad_to_square:
+                max_size = max(results[key].shape[:2])
+                self.size = (max_size, max_size)
+            if self.size is not None:
+                padded_img = mmcv.impad(
+                    results[key], shape=self.size, pad_val=pad_val)
+            elif self.size_divisor is not None:
+                padded_img = mmcv.impad_to_multiple(
+                    results[key], self.size_divisor, pad_val=pad_val)
+            results[key] = padded_img
+
+
     def _pad_masks(self, results):
         """Pad masks according to ``results['pad_shape']``."""
         pad_shape = results['pad_shape'][:2]
@@ -657,6 +706,8 @@ class Pad:
         self._pad_img(results)
         self._pad_masks(results)
         self._pad_seg(results)
+        if results.get('edge_fields') is not None:
+            self._pad_edge(results)
         return results
 
     def __repr__(self):
@@ -682,8 +733,13 @@ class Normalize:
     """
 
     def __init__(self, mean, std, to_rgb=True):
-        self.mean = np.array(mean, dtype=np.float32)
-        self.std = np.array(std, dtype=np.float32)
+        # if len(mean)==2:
+        self.mean = np.array(mean[0], dtype=np.float32)
+        self.std = np.array(std[0], dtype=np.float32)
+        # self.mean 是img 参数， self.m是edge 参数
+        self.m = np.array(mean[1], dtype=np.float32)
+        self.s = np.array(std[1], dtype=np.float32)
+
         self.to_rgb = to_rgb
 
     def __call__(self, results):
@@ -699,8 +755,20 @@ class Normalize:
         for key in results.get('img_fields', ['img']):
             results[key] = mmcv.imnormalize(results[key], self.mean, self.std,
                                             self.to_rgb)
+
+        if results.get('edge_fields') is not None:
+            for key in results.get('edge_fields', ['edge']):
+                results[key] = mmcv.imnormalize(results[key], self.m, self.s,
+                                                self.to_rgb)
+
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_rgb=self.to_rgb)
+
+        # plt.plot(), plt.imshow(results['edge'])
+        # plt.show()
+        # plt.plot(), plt.imshow(results['img'])
+        # plt.show()
+
         return results
 
     def __repr__(self):

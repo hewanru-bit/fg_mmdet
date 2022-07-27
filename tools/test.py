@@ -23,12 +23,13 @@ from mmdet.utils import setup_multi_processes, update_data_root
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py' ,help = 'test config file path')
-    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/faster_r50_fpn_1x_voc/latest.pth', help='checkpoint file')
+    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/a_fgcoco/c_hd_border.py' ,help = 'test config file path')
+    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdet_works/work_dirs/c_hd_border/latest.pth', help='checkpoint file')
     parser.add_argument(
         '--work-dir',
         help='the directory to save the file containing evaluation metrics')
-    parser.add_argument('--out', default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/faster_r50_fpn_1x_voc/faster_voc.pkl',
+    parser.add_argument('--out',
+                        default='/home/tju531/hwr/mmdet_works/results/c_hd_border/c_hd_border.pkl',
                         help='output result file in pickle format')
     parser.add_argument(
         '--fuse-conv-bn',

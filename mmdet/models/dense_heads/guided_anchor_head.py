@@ -281,7 +281,7 @@ class GuidedAnchorHead(AnchorHead):
                 approxs = multi_level_approxs[i]
                 inside_flags_list = []
                 for i in range(self.approxs_per_octave):
-                    split_valid_flags = flags[i::self.approxs_per_octave]
+                    split_valid_flags = flags[i::self.approxs_per_octave] # 切片索引 从i开始，间隔是self.approxs_per_octave 9 个
                     split_approxs = approxs[i::self.approxs_per_octave, :]
                     inside_flags = anchor_inside_flags(
                         split_approxs, split_valid_flags,

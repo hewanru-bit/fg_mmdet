@@ -275,9 +275,9 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                     # Empty proposal.
                     if cls_score.numel() == 0:
                         break
-
-                    roi_labels = torch.where(
-                        roi_labels == self.bbox_head[i].num_classes,
+                    # 为了能够保证一致性，需要将标注为背景的 roi_labels 替换为网络真正预测类别值
+                    roi_labels = torch.where(  # torch.where()函数的作用是按照一定的规则合并两个tensor类型
+                        roi_labels == self.bbox_head[i].num_classes,  ## 如果成立，roi_labels取cls_score[:, :-1].argmax(1)
                         cls_score[:, :-1].argmax(1), roi_labels)
                     proposal_list = self.bbox_head[i].refine_bboxes(
                         bbox_results['rois'], roi_labels,

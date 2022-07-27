@@ -19,7 +19,7 @@ from mmdet.datasets import (build_dataloader, build_dataset,
 from mmdet.models import build_detector
 from mmdet.utils import setup_multi_processes
 
-#
+# 由 测试结果的pkl文件生成 测试结果是bbox.json类型的文件，是进行tide错误类型分析的基础，也是进行画pr曲线的基础
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')

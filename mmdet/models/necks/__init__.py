@@ -16,12 +16,15 @@ from .ssd_neck import SSDNeck
 from .yolo_neck import YOLOV3Neck
 from .yolox_pafpn import YOLOXPAFPN
 
-from .hefpn import HEFPN
+from .acfpn import ACFPN
 from .hebfp import HEBFP
 from .CFPN import CFPN
+from .bcfpn import BCFPN
+from .bcfpn_cell import BCFPNC
 
 __all__ = [
     'FPN', 'BFP', 'ChannelMapper', 'HRFPN', 'NASFPN', 'FPN_CARAFE', 'PAFPN',
     'NASFCOS_FPN', 'RFP', 'YOLOV3Neck', 'FPG', 'DilatedEncoder',
-    'CTResNetNeck', 'SSDNeck', 'YOLOXPAFPN', 'DyHead','HEFPN','HEBFP','CFPN'
+    'CTResNetNeck', 'SSDNeck', 'YOLOXPAFPN', 'DyHead','ACFPN','HEBFP','CFPN',
+    'BCFPN','BCFPNC'
 ]

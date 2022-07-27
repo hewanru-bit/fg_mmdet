@@ -187,9 +187,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.prediction_path='/home/tju531/hwr/mmdetection/tools/others/results/1_faster_rcnn_r50_fpn_1x_fgvoc/7_ffanet.pkl'
-    args.config ='/home/tju531/hwr/mmdetection/configs/a_fg/1_faster_rcnn_r50_fpn_1x_fgvoc.py'
-    args.show_dir = '/home/tju531/hwr/mmdetection/tools/others/show_dir/faster/raw/'
+    args.prediction_path='/home/tju531/hwr/mmdet_works/results/7_atss_r50_fpn_1x_fgvoc/0_raw.pkl'
+    args.config ='/home/tju531/hwr/mmdetection/configs/a_fgvoc/7_atss_r50_fpn_1x_fgvoc.py'
+    args.show_dir = '/home/tju531/hwr/mmdet_works/show_dir/7_atss/raw/'
 
     if not osp.exists(args.show_dir):
         os.makedirs(args.show_dir)

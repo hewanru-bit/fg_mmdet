@@ -39,9 +39,9 @@ ALL_METHODS = list(GRAD_FREE_METHOD_MAP.keys() | GRAD_BASE_METHOD_MAP.keys())
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Visualize CAM')
-    parser.add_argument('--img',default='/home/tju531/hwr/mmdetection/demo/1.png', help='Image file')
-    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/a_fg/1_faster_rcnn_r50_fpn_1x_fgvoc.py',help='Config file')
-    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/faster_r50_fpn_1x_fgvoc/latest.pth',
+    parser.add_argument('--img',default='/home/tju531/hwr/mmdetection/demo/2.png', help='Image file')
+    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/a_fgvoc/1_faster_rcnn_r50_fpn_1x_fgvoc.py',help='Config file')
+    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdet_work/work_dirs/faster_r50_fpn_1x_fgvoc/latest.pth',
                         help='Checkpoint file')
     parser.add_argument('--out-dir', default=None, help='dir to output file')
     parser.add_argument(

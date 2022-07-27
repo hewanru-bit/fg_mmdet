@@ -18,6 +18,7 @@ from .xml_style import XMLDataset
 
 from .fgvoc import FGVOCDataset
 from .fgcoco import FGCocoDataset
+from .udvoc import UDVOCDataset
 __all__ = [
     'CustomDataset', 'XMLDataset', 'CocoDataset', 'DeepFashionDataset',
     'VOCDataset', 'CityscapesDataset', 'LVISDataset', 'LVISV05Dataset',
@@ -26,5 +27,6 @@ __all__ = [
     'ClassBalancedDataset', 'WIDERFaceDataset', 'DATASETS', 'PIPELINES',
     'build_dataset', 'replace_ImageToTensor', 'get_loading_pipeline',
     'NumClassCheckHook', 'CocoPanopticDataset', 'MultiImageMixDataset',
-    'OpenImagesDataset', 'OpenImagesChallengeDataset','FGVOCDataset','FGCocoDataset'
+    'OpenImagesDataset', 'OpenImagesChallengeDataset','FGVOCDataset','FGCocoDataset',
+    'UDVOCDataset'
 ]

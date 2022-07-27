@@ -21,7 +21,7 @@ def parse_args():
         description='MMDet test (and eval) a model')
     parser.add_argument('--config', default = '/home/tju531/hwr/mmdetection/configs/a_fg/2_yolov3_d53_mstrain-608_273e_fgvoc.py',
                         help='test config file path')
-    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/yolov3_d53_mstrain-608_273e_fgvoc/latest.pth',
+    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_work/work_dirs/yolov3_d53_mstrain-608_273e_fgvoc/latest.pth',
                         help='checkpoint file .pth')
     parser.add_argument('--img_dir', type=str, default='../demo', help='show img dir')
     # 显示预测结果

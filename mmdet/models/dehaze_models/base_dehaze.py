@@ -11,18 +11,18 @@ class BaseDehaze(BaseModule, metaclass=ABCMeta):
     """Base dehaze"""
 
     def __init__(self,
-                 loss_enhance=dict(type='L1Loss', loss_weight=1.0),
+                 loss_dehaze=dict(type='L1Loss', loss_weight=1.0),
                  loss_perceptual=None,
                  init_cfg=None):
         super().__init__(init_cfg=init_cfg)
-        if isinstance(loss_enhance, dict):
-            self.loss_enhance = build_loss(loss_enhance)
-        elif isinstance(loss_enhance, list):
-            self.loss_enhance = [
-                build_loss(loss_cfg) for loss_cfg in loss_enhance
+        if isinstance(loss_dehaze, dict):
+            self.loss_dehaze = build_loss(loss_dehaze)
+        elif isinstance(loss_dehaze, list):
+            self.loss_dehaze = [
+                build_loss(loss_cfg) for loss_cfg in loss_dehaze
             ]
-        elif loss_enhance is None:
-            loss_enhance = None
+        elif loss_dehaze is None:
+            self.loss_dehaze = None
         else:
             raise KeyError
         if loss_perceptual is not None:
@@ -53,7 +53,7 @@ class BaseDehaze(BaseModule, metaclass=ABCMeta):
                       img,
                       img_metas,
                       gt_img,
-                      return_enhance_img=False,
+                      return_dehaze_img=False,
                       **kwargs):
         """
         Args:
@@ -66,14 +66,14 @@ class BaseDehaze(BaseModule, metaclass=ABCMeta):
         Returns:
             losses: (dict): A dictionary of loss components.
         """
-        enhance_img = self(img)
+        dehaze_img = self(img)
         assert gt_img is not None
-        assert enhance_img.shape == img.shape
+        assert dehaze_img.shape == img.shape
         losses = self.loss(
-            *(enhance_img, ), gt_img=gt_img, img_metas=img_metas)
+            *(dehaze_img, ), gt_img=gt_img, img_metas=img_metas)
 
-        if return_enhance_img:
-            return enhance_img, losses
+        if return_dehaze_img:
+            return dehaze_img, losses
         else:
             return losses
 

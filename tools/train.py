@@ -24,11 +24,11 @@ from mmdet.utils import (collect_env, get_root_logger, setup_multi_processes,
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
     parser.add_argument(
-    '--config', default = '/home/tju531/hwr/mmdetection/configs/a_fgcoco/2_atss_branch_re18.py',
+    '--config', default = '/home/tju531/hwr/mmdetection/configs/a_fgcoco/ga_retinanet.py',
     # '--config', default='/home/tju531/hwr/mmdetection/configs/dyhead/atss_r50_fpn_dyhead_1x_coco.py',
                         help='train config file path')
     parser.add_argument('--work-dir',
-                        default='/home/tju531/hwr/mmdet_work/2_atss_branch_re18',
+                        default='/home/tju531/hwr/mmdet_works/aa_work_dirs/ga_retinanet',
                         help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from',
@@ -60,7 +60,7 @@ def parse_args():
         default=0,
         help='id of gpu to use '
         '(only applicable to non-distributed training)')
-    parser.add_argument('--seed', type=int, default=None, help='random seed')
+    parser.add_argument('--seed', type=int, default=0, help='random seed')
     parser.add_argument(
         '--diff-seed',
         action='store_true',

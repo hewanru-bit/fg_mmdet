@@ -72,6 +72,7 @@ class HEbaseOneDetector(BaseDetector):
                       img_metas,
                       gt_bboxes,
                       gt_labels,
+                      edge,
                       gt_bboxes_ignore=None):
         """
         Args:

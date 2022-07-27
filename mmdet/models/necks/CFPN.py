@@ -37,10 +37,13 @@ class CFPN(BaseModule):
     def __init__(self,
                  in_channels,# [256, 512, 1024, 2048]
                  out_channels,  # 256
-                 num_outs=4,
+                 num_outs=5,
+                 start_level=0,
+                 end_level=-1,
+                 add_extra_convs=False,
+                 relu_before_extra_convs=False,
                  shape_level=2,  #平均池化的尺寸与这一层相同
                  pooling_type='AVG',
-                 used_backbone_levels=4, # (0,used_backbone_levels)的层输出
                  conv_cfg=None,
                  norm_cfg=None,
                  act_cfg=None,
@@ -60,16 +63,33 @@ class CFPN(BaseModule):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.upsample_cfg = upsample_cfg.copy()
-        self.used_backbone_levels=used_backbone_levels
+
+        if end_level == -1:
+            self.backbone_end_level = self.num_ins
+            assert num_outs >= self.num_ins - start_level
+        else:
+            # if end_level < inputs, no extra level is allowed
+            self.backbone_end_level = end_level
+            assert end_level <= len(in_channels)
+            assert num_outs == end_level - start_level
+        self.start_level = start_level
+        self.end_level = end_level
+        self.add_extra_convs = add_extra_convs
+        assert isinstance(add_extra_convs, (str, bool))
+        if isinstance(add_extra_convs, str):
+            # Extra_convs_source choices: 'on_input', 'on_lateral', 'on_output'
+            assert add_extra_convs in ('on_input', 'on_lateral', 'on_output')
+        elif add_extra_convs:  # True
+            self.add_extra_convs = 'on_input'
 
         self.la1_convs = nn.ModuleList()
         self.fp1_convs = nn.ModuleList()
         self.la2_convs = nn.ModuleList()
-        self.fp2_convs = nn.ModuleList()
+        self.fpn_convs = nn.ModuleList()
         self.fc = nn.Sequential(nn.AdaptiveAvgPool2d(1),
                                 nn.Conv2d(self.out_channels*self.num_ins , self.num_ins, 1)
                                 )
-        for i in range(self.num_outs):
+        for i in range(self.num_ins):
             l1_conv = ConvModule(
                 in_channels[i],
                 out_channels,
@@ -109,12 +129,32 @@ class CFPN(BaseModule):
             self.la1_convs.append(l1_conv)
             self.fp1_convs.append(f1_conv)
             self.la2_convs.append(l2_conv)
-            self.fp2_convs.append(f2_conv)
+            self.fpn_convs.append(f2_conv)
 
         if pooling_type == 'MAX':
             self.pooling = F.max_pool2d
         else:
             self.pooling = F.adaptive_avg_pool2d  ##自适应全局平均池
+
+        # add extra conv layers (e.g., RetinaNet)
+        extra_levels = num_outs - self.backbone_end_level + self.start_level
+        if self.add_extra_convs and extra_levels >= 1:
+            for i in range(extra_levels):
+                if i == 0 and self.add_extra_convs == 'on_input':
+                    in_channels = self.in_channels[self.backbone_end_level - 1]
+                else:
+                    in_channels = out_channels
+                extra_fpn_conv = ConvModule(
+                    in_channels,
+                    out_channels,
+                    3,
+                    stride=2,
+                    padding=1,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg,
+                    act_cfg=act_cfg,
+                    inplace=False)
+                self.fpn_convs.append(extra_fpn_conv)
 
     def forward(self, inputs):
         """Forward function."""
@@ -133,16 +173,18 @@ class CFPN(BaseModule):
         # 3.经过二次FC得到各层的权重
         # out=out.view(-1)  # 如果使用全连接层linear需要
         ws = self.fc(out)
-        ws=ws.view(-1)  #  如果使用全连接层linear不需要
+        ws = torch.sigmoid(ws)  # # 映射到0 -1 范围
+        # # 对ws 按照通道数进行分离 b,1,1,1
+        w = torch.split(ws, 1, dim=1)
         # 4.每层与对应的权重进行相乘
         inner_outs=[]
-        for i in range(0, self.num_outs):
-            inner_outs.append(inputs[i]*ws[i])
+        for i in range(0, self.num_ins):
+            inner_outs.append(inputs[i]*w[i])
 
         # 5. pool分别得到各层
 
         tmp_outs = []
-        for i in range(0, self.num_outs):
+        for i in range(0, self.num_ins):
             out_size = inputs[i].size()[2:]
             tmp_out=self.pooling(inner_outs[i], output_size=out_size)
             tmp_out = self.fp1_convs[i](tmp_out)
@@ -150,12 +192,38 @@ class CFPN(BaseModule):
             tmp_outs.append(tmp_out)
 
         # 6.fpn up to down
-        for i in range(self.num_outs-1,0,-1):
+        for i in range(self.num_ins-1,0,-1):
             prev_shape = tmp_outs[i - 1].shape[2:]
             tmp_outs[i - 1] = tmp_outs[i - 1] + F.interpolate(
                 tmp_outs[i],size=prev_shape, **self.upsample_cfg)
         # 7.指定使用的层,经过卷积存储
+        # build outputs
+        # part 1: from original levels
         outs = [
-            self.fp2_convs[i](tmp_outs[i]) for i in range(self.used_backbone_levels)
+            self.fpn_convs[i](tmp_outs[i]) for i in range(self.num_ins)
         ]
+        # part 2: add extra levels
+        if self.num_outs > len(outs):
+            # use max pool to get more levels on top of outputs
+            # (e.g., Faster R-CNN, Mask R-CNN)
+            if not self.add_extra_convs:
+                for i in range(self.num_outs - self.num_ins):
+                    outs.append(F.max_pool2d(outs[-1], 1, stride=2))
+            # add conv layers on top of original feature maps (RetinaNet)
+            else:
+                if self.add_extra_convs == 'on_input':
+                    extra_source = inputs[self.backbone_end_level - 1]
+                elif self.add_extra_convs == 'on_lateral':
+                    extra_source = tmp_outs[-1]
+                elif self.add_extra_convs == 'on_output':
+                    extra_source = outs[-1]
+                else:
+                    raise NotImplementedError
+                outs.append(self.fpn_convs[self.num_ins](extra_source))
+                for i in range(self.num_ins + 1, self.num_outs):
+                    if self.relu_before_extra_convs:
+                        outs.append(self.fpn_convs[i](F.relu(outs[-1])))
+                    else:
+                        outs.append(self.fpn_convs[i](outs[-1]))
+
         return tuple(outs)

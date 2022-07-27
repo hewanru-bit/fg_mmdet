@@ -4,6 +4,7 @@ import torch
 
 from mmdet.models.dehaze_models import AODNet
 from mmdet.models.dehaze_models import CONVMNet
+from mmdet.models.necks import ACFPN1
 
 def test_anchor_head_loss():
     """Tests anchor head loss when truth is empty and non-empty."""
@@ -33,17 +34,12 @@ def test_anchor_head_loss():
 
     cfg = mmcv.Config(
         dict(
-            in_channels=(1, 256, 256, 512, 1024),
-            out_channels=(256, 256, 512, 1024, 2048),
-            num_block=5,  ####构造5个CONVM
-            out_indices=(1, 2, 3, 4),  ###输出层数从0开始
-            plugins=None,
-            pretrained=None,
-            downsample=True,
-            init_cfg=dict(type='Normal', layer='Conv2d', std=0.01),
-            norm_eval=False
+            in_channels=[8, 16, 32, 64],
+            out_channels=16,
+            num_outs=4,
+            shape_level=[0, 1, 2, 3]
         ))
-    self = CONVMNet(**cfg)
+    self = ACFPN1(**cfg)
 
     x = torch.rand(1,1,40,60)
     cls_scores = self.forward(x)

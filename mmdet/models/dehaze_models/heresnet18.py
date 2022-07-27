@@ -9,7 +9,8 @@ from torch.nn.modules.batchnorm import _BatchNorm
 
 from ..builder import DEHAZEMODELS
 from ..utils import ResLayer
-
+from .base_dehaze import BaseDehaze
+from ..builder import build_loss
 
 class BasicBlock(BaseModule):
     expansion = 1
@@ -303,7 +304,7 @@ class Bottleneck(BaseModule):
 
 
 @DEHAZEMODELS.register_module()
-class HResNet(BaseModule):
+class HResNet(BaseDehaze):
     """ResNet backbone.
 
     Args:
@@ -368,7 +369,7 @@ class HResNet(BaseModule):
 
     def __init__(self,
                  depth,
-                 in_channels=1,#########   3
+                 in_channels=3,#########   3
                  stem_channels=None,
                  base_channels=64,
                  num_stages=4,
@@ -388,9 +389,12 @@ class HResNet(BaseModule):
                  with_cp=False,
                  zero_init_residual=True,
                  pretrained=None,
-                 init_cfg=None):
-        super(HResNet, self).__init__(init_cfg)
+                 init_cfg=None,
+                 **kwargs):
+        super(HResNet, self).__init__(
+            init_cfg=init_cfg, **kwargs)
         self.zero_init_residual = zero_init_residual
+
         if depth not in self.arch_settings:
             raise KeyError(f'invalid depth {depth} for resnet')
 
@@ -650,22 +654,63 @@ class HResNet(BaseModule):
             x = res_layer(x)
             if i in self.out_indices:
                 outs.append(x)
-        out=[]
-        for i in range(4):
-            out.append(self.f[i](outs[i]))
-        return tuple(out)
+        # out=[]
+        # for i in range(4):
+        #     out.append(self.f[i](outs[i]))
+        return outs
 
-    def train(self, mode=True):
-        """Convert the model into training mode while keep normalization layer
-        freezed."""
-        super(HResNet, self).train(mode)
-        self._freeze_stages()
-        if mode and self.norm_eval:
-            for m in self.modules():
-                # trick: eval have effect on BatchNorm only
-                if isinstance(m, _BatchNorm):
-                    m.eval()
+    def loss(self, dehaze_img, gt_img, img_metas):
+        if isinstance(self.loss_dehaze, list):
+            losses = []
+            for loss_dehaze in self.loss_dehaze:
+                loss = loss_dehaze(dehaze_img, gt_img)
+                if isinstance(loss, tuple):
+                    # Perceptual Loss
+                    loss = loss[0]
+                losses.append(loss)
+        else:
+            losses = self.loss_dehaze(dehaze_img, gt_img)
+        if self.loss_perseptual is not None:
+            device = dehaze_img.device
+            loss_perseptual = self.loss_perseptual.to(device)
+            perseptual_loss, style_loss = loss_perseptual(dehaze_img, gt_img)
+            return dict(branch_loss=losses, perseptual_loss=perseptual_loss)
+        else:
+            return dict(branch_loss=losses)
 
+    def get_results(self, *args, **kwargs):
+        pass
+
+    ###其实流程是在self.dehaze_model.forward_train 中经过dehaze_model，
+    # 但是我已经在特征提取中经过啦，所以重新一下self.dehaze_model.forward_train# 只求loss就可以啦
+    def forward_train(self,
+                      img,
+                      img_metas,
+                      gt_img,
+                      return_enhance_img=False,
+                      **kwargs):
+        """
+        Args:
+            img (Tensor): Features from FPN.
+            img_metas (list[dict]): Meta information of each image, e.g.,
+                image size, scaling factor, etc.
+            gt_img (Tensor): Ground truth images, has a shape
+                (num_gts, H, W).
+
+        Returns:
+            losses: (dict): A dictionary of loss components.
+        """
+        # enhance_img = self(img)
+        # assert gt_img is not None
+        # assert enhance_img.shape == img.shape
+        enhance_img = img
+        losses = self.loss(
+            *(enhance_img, ), gt_img=gt_img, img_metas=img_metas)
+
+        if return_enhance_img:
+            return enhance_img, losses
+        else:
+            return losses
 
 @DEHAZEMODELS.register_module()
 class HResNetV1d(HResNet):

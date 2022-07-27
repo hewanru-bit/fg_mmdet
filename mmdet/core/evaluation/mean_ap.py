@@ -482,6 +482,7 @@ def get_cls_results(det_results, annotations, class_id):
     Returns:
         tuple[list[np.ndarray]]: detected bboxes, gt bboxes, ignored gt bboxes
     """
+    ### 得到每一张图片某一类（如id=0)的结果
     cls_dets = [img_res[class_id] for img_res in det_results]
     cls_gts = []
     cls_gts_ignore = []

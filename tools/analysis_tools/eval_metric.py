@@ -11,10 +11,10 @@ from mmdet.utils import update_data_root
 def parse_args():
     parser = argparse.ArgumentParser(description='Evaluate metric of the '
                                      'results saved in pkl format')
-    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/a_fg/1_faster_rcnn_r50_fpn_1x_fgvoc.py',
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/a_fgvoc/7_atss_r50_fpn_1x_fgvoc.py',
                         help='Config of the model')
     parser.add_argument('--pkl_results',
-                        default='/home/tju531/hwr/mmdetection/tools/others/results/1_faster_rcnn_r50_fpn_1x_fgvoc/0_raw.pkl',
+                        default='/home/tju531/hwr/mmdet_works/results/7_atss_r50_fpn_1x_fgvoc/0_raw.pkl',
                         help='Results in pickle format')
     parser.add_argument(
         '--format-only',

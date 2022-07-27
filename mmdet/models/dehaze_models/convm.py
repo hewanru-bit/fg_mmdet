@@ -53,7 +53,7 @@ class convdown(BaseModule):
         self.with_cp = with_cp
         if self.downsample:
          self.down = build_conv_layer(conv_cfg, out_channel, out_channel,
-                                      2,stride=2,padding=1, bias=False)
+                                      3,stride=2,padding=1, bias=False)
 
     @property
     def norm1(self):

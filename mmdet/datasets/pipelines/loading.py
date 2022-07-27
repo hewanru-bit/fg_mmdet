@@ -1,12 +1,15 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
-
+import matplotlib.pyplot as plt
 import mmcv
 import numpy as np
 import pycocotools.mask as maskUtils
 
 from mmdet.core import BitmapMasks, PolygonMasks
 from ..builder import PIPELINES
+
+from mmdet.models.edge import *
+
 
 try:
     from panopticapi.utils import rgb2id
@@ -85,6 +88,40 @@ class LoadImageFromFile:
                     f"channel_order='{self.channel_order}', "
                     f'file_client_args={self.file_client_args})')
         return repr_str
+
+
+@PIPELINES.register_module()
+class GetEdge:
+
+    def __init__(self,
+                 only_bbox=False,  # only_bbox = Ture时，只求gt_bbox的目标的边缘
+                 edge_method='Scharr'):
+        self.edge_method = edge_method
+        self.only_bbox = only_bbox
+
+    def __call__(self, results):
+        img = results['img']
+        methods = ['Roberts', 'Prewitt', 'Canny', 'Scharr', 'Sobel', 'Laplacian', 'LOG']
+        if self.edge_method in methods:
+            if self.only_bbox:
+                # 只求gt_bbox 中目标的边缘
+                bbox_points = results['gt_bboxes']
+                edge_out = object_edge(img,bbox_points,method=self.edge_method)  # ndarray ,h,w
+                edge_out = np.expand_dims(edge_out, axis=-1)
+            else:
+                edge_out = edge(img,self.edge_method)  # ndarray ,h,w
+                edge_out = np.expand_dims(edge_out, axis=-1)
+        else:
+            edge_out = None
+        results['edge'] = edge_out
+        results['edge_fields'] = ['edge']
+
+        # plt.plot(), plt.imshow(results['edge'])
+        # plt.show()
+        # plt.plot(), plt.imshow(results['img'])
+        # plt.show()
+
+        return results
 
 
 @PIPELINES.register_module()

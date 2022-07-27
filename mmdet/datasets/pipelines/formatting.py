@@ -229,6 +229,19 @@ class DefaultFormatBundle:
             img = np.ascontiguousarray(img.transpose(2, 0, 1))
             results['img'] = DC(
                 to_tensor(img), padding_value=self.pad_val['img'], stack=True)
+
+        if 'edge' in results:
+            edge = results['edge']
+            if self.img_to_float is True and edge.dtype == np.uint8:
+                edge = edge.astype(np.float32)
+
+            if len(edge.shape) < 3:
+                edge = np.expand_dims(edge, -1)
+            edge = np.ascontiguousarray(edge.transpose(2, 0, 1))
+            results['edge'] = DC(
+                to_tensor(edge), padding_value=self.pad_val['img'], stack=True)
+            # pad_val 中没有设置edge 的和img用一样的
+
         for key in ['proposals', 'gt_bboxes', 'gt_bboxes_ignore', 'gt_labels']:
             if key not in results:
                 continue
