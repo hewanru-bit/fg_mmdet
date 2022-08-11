@@ -195,38 +195,12 @@ def main():
     devkit_path = args.devkit_path
     out_dir = args.out_dir if args.out_dir else devkit_path
     mmcv.mkdir_or_exist(out_dir)
-    #
-    # years = []
-    # if osp.isdir(osp.join(devkit_path, 'VOC2007')):
-    #     years.append('2007')
-    # if osp.isdir(osp.join(devkit_path, 'VOC2012')):
-    #     years.append('2012')
-    # if '2007' in years and '2012' in years:
-    #     years.append(['2007', '2012'])
-    # if not years:
-    #     raise IOError(f'The devkit path {devkit_path} contains neither '
-    #                   '"VOC2007" nor "VOC2012" subfolder')
+
     out_fmt = f'.{args.out_format}'
     if args.out_format == 'coco':
         out_fmt = '.json'
-    # for year in years:
-    #     if year == '2007':
-    #         prefix = 'voc07'
-    #     elif year == '2012':
-    #         prefix = 'voc12'
-    #     elif year == ['2007', '2012']:
-    #         prefix = 'voc0712'
-    #     for split in ['train', 'val', 'trainval']:
-    #         dataset_name = prefix + '_' + split
-    #         print(f'processing {dataset_name} ...')
-    #         cvt_annotations(devkit_path, year, split,
-    #                         osp.join(out_dir, dataset_name + out_fmt))
-    #     if not isinstance(year, list):
-    #         dataset_name = prefix + '_test'
-    #         print(f'processing {dataset_name} ...')
-    #         cvt_annotations(devkit_path, year, 'test',
-    #                         osp.join(out_dir, dataset_name + out_fmt))
-    prefix='rtts'
+
+    prefix='he'
     # for split in ['train', 'val', 'trainval']:
     for split in ['train', 'test']:
         dataset_name = prefix + '_' + split

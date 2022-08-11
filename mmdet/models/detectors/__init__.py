@@ -50,6 +50,9 @@ from .he_atss import HEATSS
 from .he_branch_atss import HEBHATSS
 from .he_batss import BATSS
 from .he_catss import CATSS
+from .aretinanet import ARetinaNet
+from .afcos import AFCOS
+from .afaster_rcnn import AFasterRCNN
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
     'KnowledgeDistillationSingleStageDetector', 'FastRCNN', 'FasterRCNN',
@@ -60,6 +63,6 @@ __all__ = [
     'DeformableDETR', 'AutoAssign', 'YOLOF', 'CenterNet', 'YOLOX',
     'TwoStagePanopticSegmentor', 'PanopticFPN', 'QueryInst', 'LAD', 'TOOD',
     'MaskFormer', 'Mask2Former','HEFasterRCNN','HEbaseDetector','HEATSS','HEbaseOneDetector',
-    'HEBHATSS','BATSS','CATSS'
+    'HEBHATSS','BATSS','CATSS','ARetinaNet','AFCOS', 'AFasterRCNN'
 
 ]

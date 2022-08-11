@@ -5,7 +5,16 @@ optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=500,
+    warmup_iters=1000,
     warmup_ratio=0.001,
     step=[8, 11])
 runner = dict(type='EpochBasedRunner', max_epochs=12)
+
+# learning policy
+# lr_config = dict(
+#     policy='CosineAnealing',  # 余弦衰减
+#     min_lr = 0.0001,
+#     min_lr_ratio=None,
+#     warmup='linear',
+#     warmup_iters=1000,
+#     warmup_ratio=0.001)

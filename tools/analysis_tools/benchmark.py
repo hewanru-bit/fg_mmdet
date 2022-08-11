@@ -18,8 +18,10 @@ from mmdet.utils import update_data_root
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MMDet benchmark a model')
-    parser.add_argument('config', help='test config file path')
-    parser.add_argument('checkpoint', help='checkpoint file')
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/ret_fpn.py',
+                        help='test config file path')
+    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/aa_work_dirs/0_ret_fpn/epoch_12.pth',
+                        help='checkpoint file')
     parser.add_argument(
         '--repeat-num',
         type=int,

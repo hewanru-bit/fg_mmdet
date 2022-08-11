@@ -15,7 +15,8 @@ except ImportError:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('config', help='train config file path')
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/ret_nbcfpn.py',
+                        help='train config file path')
     parser.add_argument(
         '--shape',
         type=int,

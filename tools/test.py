@@ -23,13 +23,13 @@ from mmdet.utils import setup_multi_processes, update_data_root
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/a_fgcoco/c_hd_border.py' ,help = 'test config file path')
-    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdet_works/work_dirs/c_hd_border/latest.pth', help='checkpoint file')
+    parser.add_argument('--config', default = '/home/tju531/hwr/mmdetection/configs/aa/fcos_edge.py',help = 'test config file path')
+    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/works/fcos/latest.pth', help='checkpoint file')
     parser.add_argument(
         '--work-dir',
         help='the directory to save the file containing evaluation metrics')
     parser.add_argument('--out',
-                        default='/home/tju531/hwr/mmdet_works/results/c_hd_border/c_hd_border.pkl',
+                        # default='/home/tju531/hwr/mmdet_works/results/c_hd_border/c_hd_border.pkl',
                         help='output result file in pickle format')
     parser.add_argument(
         '--fuse-conv-bn',
@@ -56,6 +56,7 @@ def parse_args():
         'submit it to the test server')
     parser.add_argument(
         '--eval',
+        default='bbox',
         type=str,
         nargs='+',
         help='evaluation metrics, which depends on the dataset, e.g., "bbox",'

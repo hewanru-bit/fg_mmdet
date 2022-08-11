@@ -43,6 +43,11 @@ from .yolox_head import YOLOXHead
 from .he_rpn_head import HERPNHead
 from .he_atss_head import HEATSSHead
 from .he_catss_head import CATSSHead
+from .aretin_head import ARetinaHead
+from .bretin_head import BRetinaHead
+from .cretin_head import CRetinaHead
+from .afcos_head import AFCOSHead
+from .arpn_head import ARPNHead
 __all__ = [
     'AnchorFreeHead', 'AnchorHead', 'GuidedAnchorHead', 'FeatureAdaption',
     'RPNHead', 'GARPNHead', 'RetinaHead', 'RetinaSepBNHead', 'GARetinaHead',
@@ -55,5 +60,6 @@ __all__ = [
     'AutoAssignHead', 'DETRHead', 'YOLOFHead', 'DeformableDETRHead',
     'SOLOHead', 'DecoupledSOLOHead', 'CenterNetHead', 'YOLOXHead',
     'DecoupledSOLOLightHead', 'LADHead', 'TOODHead', 'MaskFormerHead',
-    'Mask2FormerHead','HERPNHead','HEATSSHead','CATSSHead'
+    'Mask2FormerHead','HERPNHead','HEATSSHead','CATSSHead','ARetinaHead',
+    'BRetinaHead','CRetinaHead', 'AFCOSHead', 'ARPNHead'
 ]

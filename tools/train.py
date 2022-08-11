@@ -24,15 +24,15 @@ from mmdet.utils import (collect_env, get_root_logger, setup_multi_processes,
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
     parser.add_argument(
-    '--config', default = '/home/tju531/hwr/mmdetection/configs/a_fgcoco/ga_retinanet.py',
-    # '--config', default='/home/tju531/hwr/mmdetection/configs/dyhead/atss_r50_fpn_dyhead_1x_coco.py',
+    '--config', default = '/home/tju531/hwr/mmdetection/configs/aa/faster_edge.py',
+    # '--config', default='/home/tju531/hwr/mmdetection/configs/a_fgcoco/0_atss_r50_fpn_fgcoco.py',
                         help='train config file path')
     parser.add_argument('--work-dir',
-                        default='/home/tju531/hwr/mmdet_works/aa_work_dirs/ga_retinanet',
+                        default='/home/tju531/hwr/mmdet_works/works/faster_edge/',
                         help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from',
-        # default='/home/tju531/hwr/mmdetection/tools/work_dirs/yolov3_d53_mstrain-608_273e_coco/latest.pth',
+        # default='/home/tju531/hwr/mmdet_works/aa_work_dirs/hd_aret_attenfpn_cat_dp/latest.pth',
         help='the checkpoint file to resume from')
     parser.add_argument(
         '--auto-resume',
@@ -68,6 +68,7 @@ def parse_args():
     parser.add_argument(
         '--deterministic',
         action='store_true',
+        # default='True',
         help='whether to set deterministic options for CUDNN backend.')
     parser.add_argument(
         '--options',
