@@ -48,6 +48,7 @@ from .bretin_head import BRetinaHead
 from .cretin_head import CRetinaHead
 from .afcos_head import AFCOSHead
 from .arpn_head import ARPNHead
+from .areppoints_head import ARepPointsHead
 __all__ = [
     'AnchorFreeHead', 'AnchorHead', 'GuidedAnchorHead', 'FeatureAdaption',
     'RPNHead', 'GARPNHead', 'RetinaHead', 'RetinaSepBNHead', 'GARetinaHead',
@@ -61,5 +62,5 @@ __all__ = [
     'SOLOHead', 'DecoupledSOLOHead', 'CenterNetHead', 'YOLOXHead',
     'DecoupledSOLOLightHead', 'LADHead', 'TOODHead', 'MaskFormerHead',
     'Mask2FormerHead','HERPNHead','HEATSSHead','CATSSHead','ARetinaHead',
-    'BRetinaHead','CRetinaHead', 'AFCOSHead', 'ARPNHead'
+    'BRetinaHead','CRetinaHead', 'AFCOSHead', 'ARPNHead','ARepPointsHead'
 ]

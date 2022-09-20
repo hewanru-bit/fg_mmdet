@@ -15,6 +15,7 @@ label_ids = {name: i for i, name in enumerate(voc_classes())}
 
 def parse_xml(args):
     xml_path, img_path = args
+    # print(xml_path)
     tree = ET.parse(xml_path)
     root = tree.getroot()
     size = root.find('size')
@@ -30,10 +31,15 @@ def parse_xml(args):
         difficult = int(obj.find('difficult').text)
         bnd_box = obj.find('bndbox')
         bbox = [
-            int(bnd_box.find('xmin').text),
-            int(bnd_box.find('ymin').text),
-            int(bnd_box.find('xmax').text),
-            int(bnd_box.find('ymax').text)
+            int(float(bnd_box.find('xmin').text)),
+            int(float(bnd_box.find('ymin').text)),
+            int(float(bnd_box.find('xmax').text)),
+            int(float(bnd_box.find('ymax').text)),
+
+            # int(bnd_box.find('xmin').text),
+            # int(bnd_box.find('ymin').text),
+            # int(bnd_box.find('xmax').text),
+            # int(bnd_box.find('ymax').text)
         ]
         if difficult:
             bboxes_ignore.append(bbox)
@@ -71,14 +77,14 @@ def cvt_annotations(devkit_path, split, out_file):
     # if not isinstance(years, list):
     #     years = [years]
     annotations = []
-    filelist = osp.join(devkit_path,f'ImageSets/txtset/{split}.txt')
+    filelist = osp.join(devkit_path,f'rtts_coco/{split}.txt')
     img_names = mmcv.list_from_file(filelist)
     xml_paths = [
         osp.join(devkit_path, f'Annotations/{img_name}.xml')
         for img_name in img_names
     ]
     img_paths = [
-        f'JPEGImages/{img_name}.png' for img_name in img_names
+        f'{img_name}.png' for img_name in img_names
     ]
     part_annotations = mmcv.track_progress(parse_xml,
                                            list(zip(xml_paths, img_paths)))
@@ -200,9 +206,9 @@ def main():
     if args.out_format == 'coco':
         out_fmt = '.json'
 
-    prefix='he'
+    prefix='dcp'
     # for split in ['train', 'val', 'trainval']:
-    for split in ['train', 'test']:
+    for split in ['train','test']:
         dataset_name = prefix + '_' + split
         print(f'processing {dataset_name} ...')
         cvt_annotations(devkit_path,  split,osp.join(out_dir, dataset_name + out_fmt))

@@ -112,7 +112,12 @@ class ResultVisualizer:
         out_dir = osp.abspath(show_dir)
         mmcv.mkdir_or_exist(out_dir)
         prog_bar = mmcv.ProgressBar(len(results))
+
+        i=0
         for index, (result,) in enumerate(zip(results)):
+            i+=1
+            if i>9:
+                break
 
             if show_index is not None:
                 assert len(show_index) > 0
@@ -140,9 +145,9 @@ class ResultVisualizer:
                 gt_text_color=(255, 255, 255),
                 gt_mask_color=(128, 42, 42),
                 # 金黄色 #FFD700，石板蓝 #6A5ACD，紫色 #A020F0，印度红 #B0171F
-                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31)],
-                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
-                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31)],
+                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31), (135, 162, 86)],
+                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
+                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31), (135, 162, 86)],
                 show=self.show,
                 score_thr=self.score_thr,
                 wait_time=self.wait_time,
@@ -192,10 +197,11 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.config = '/home/tju531/hwr/UWdetection/configs/uw_detection/coco_style/faster_rcnn_r50_fpn_1x_uwdet_coco.py'
-    args.prediction_path = '/home/tju531/hwr/UWdetection/result/faster_r50_1x_result/0_faster_r50_1x_raw.pkl'
-    args.show_dir = '/home/tju531/hwr/a/'
-    select_img = ['000050.jpg','001596.jpg',]  # 5,20
+    args.prediction_path = '/home/tju531/hwr/mmdet_works/pkl_dir/atss_edge_bcfpn.pkl'
+    args.config = '/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py'
+    args.show_dir = '/home/tju531/hwr/mmdet_works/results/atss_edge_bcfpn/gt/'
+    # select_img = ['000050.jpg','001596.jpg',]  # 5,20
+    select_img = None
 
     cfg = Config.fromfile(args.config)
     mmcv.check_file_exist(args.prediction_path)
@@ -210,18 +216,18 @@ def main():
     outputs = mmcv.load(args.prediction_path)
 
     #  visualize only the selected images
-    infos = dataset.data_infos
-    index = []
-    for i, info in enumerate(infos):
-        filename = info.get('filename')
-        if filename in select_img:
-            index.append(i)
+    # infos = dataset.data_infos
+    # index = []
+    # for i, info in enumerate(infos):
+    #     filename = info.get('filename')
+    #     if filename in select_img:
+    #         index.append(i)
 
     result_visualizer = ResultVisualizer(args.show, args.wait_time,
                                          args.show_score_thr)
     result_visualizer.evaluate_and_show(
         dataset, outputs, topk=args.topk, vis_det=True, vis_gt=False,
-        show_dir=args.show_dir, show_index=index)
+        show_dir=args.show_dir, show_index=None)
 
 
 if __name__ == '__main__':

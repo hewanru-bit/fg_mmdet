@@ -308,9 +308,11 @@ class DetCAMVisualizer:
         cam_image_renormalized = show_cam_on_image(
             image / 255, renormalized_cam, use_rgb=False)
 
-        image_with_bounding_boxes = self._draw_boxes(boxes, labels,
-                                                     cam_image_renormalized)
-        return image_with_bounding_boxes
+        # 不显示框和标签 返回cam_image_renormalized
+        # image_with_bounding_boxes = self._draw_boxes(boxes, labels,
+        #                                              cam_image_renormalized)
+        # return image_with_bounding_boxes
+        return cam_image_renormalized
 
 
     def _draw_boxes(self, boxes, labels, image):

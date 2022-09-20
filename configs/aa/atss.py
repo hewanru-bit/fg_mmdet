@@ -1,5 +1,5 @@
 _base_ = [
-    # '../_base_/datasets/coco_detection.py',
+    # '../_base_/datasets/uw_coco.py',
     '../_base_/datasets/fgcoco_detection.py',
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
@@ -63,9 +63,9 @@ model = dict(
 optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0001)
 
 interval=1
-checkpoint_config = dict(interval=interval,max_keep_ckpts=5)
+checkpoint_config = dict(interval=interval,max_keep_ckpts=1)
 evaluation = dict(
     save_best='auto',
     interval=interval,
-    metric='mAP')  #### VOC类型的可选： 'mAP', 'recall'，COCO类型可选proposal，bbox
+    metric='bbox')  #### VOC类型的可选： 'mAP', 'recall'，COCO类型可选proposal，bbox
 log_config = dict(interval=100) ########打印Log信息的间隔

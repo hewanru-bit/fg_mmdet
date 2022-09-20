@@ -14,9 +14,9 @@ from mmdet.models import build_detector
 
 def parse_args():
     parser = argparse.ArgumentParser(description='MMDet benchmark a model')
-    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/ret_bcfpn.py',
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/atss_bfp.py',
                         help='test config file path')
-    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/aa_work_dirs/0_ret_fpn/epoch_12.pth',
+    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/pth_dir/atss_48.3/epoch_12.pth',
                         help='checkpoint file')
     parser.add_argument(
         '--log-interval', default=1, help='interval of logging')

@@ -15,13 +15,14 @@ except ImportError:
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
-    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/ret_nbcfpn.py',
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/aa/atss_bfp.py',
                         help='train config file path')
     parser.add_argument(
         '--shape',
         type=int,
         nargs='+',
-        default=[1280, 800],
+        # default=[1280, 800],
+        default=[1333, 800],
         help='input image size')
     parser.add_argument(
         '--cfg-options',

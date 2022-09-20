@@ -187,8 +187,8 @@ def object_edge(img,gt_bboxes,method="Scharr"):
         # plt.plot(), plt.imshow(mask)
         # plt.show()
 
-        re1 = edge(mask, method)
-        out = np.expand_dims(re1, axis=-1)
+        re1 = edge(mask, method)  # h,w
+        out = np.expand_dims(re1, axis=-1) # h,w,1
         edge_gt[l: r, u: d, :] = out
 
     return edge_gt

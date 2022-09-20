@@ -79,18 +79,26 @@ class ResultVisualizer:
             fname, name = osp.splitext(osp.basename(filename))
             save_filename = fname + '_' + str(round(mAP, 3)) + name
             out_file = osp.join(out_dir, save_filename)
+            '''
+                  (210, 105, 30),  # 巧克力色 #D2691E
+                   (255, 215, 0)# 金黄色 #FFD700，
+                   (106, 90, 205),石板蓝 #6A5ACD，
+                   (160, 32, 240)紫色 #A020F0，
+                   (176, 23, 31)印度红 #B0171F
+                  (185,224,165) 绿色 # B9E0A5
+                          '''
             imshow_gt_det_bboxes(
                 data_info['img'],
                 data_info,
                 results[index],
                 dataset.CLASSES,
-                gt_bbox_color=(210, 105, 30),  # 巧克力色 #D2691E
+                gt_bbox_color=(234, 107, 102),  # 红色 #EA6B66
                 gt_text_color=(255, 255, 255),
                 gt_mask_color=(128, 42, 42),
-                # 金黄色 #FFD700，石板蓝 #6A5ACD，紫色 #A020F0，印度红 #
-                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31),(135,162,86)],
+                # 金黄色 #FFD700，石板蓝 #6A5ACD，紫色 #A020F0，巧克力色 #D2691E    # 绿色 # B9E0A5
+                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (210, 105, 30),(185,224,165)],
                 det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
-                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31)],
+                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (210, 105, 30),(185,224,165)],
                 show=self.show,
                 score_thr=self.score_thr,
                 wait_time=self.wait_time,
@@ -128,7 +136,7 @@ class ResultVisualizer:
         for i, (result, ) in enumerate(zip(results)):
             # self.dataset[i] should not call directly
             # because there is a risk of mismatch
-            if i>99:
+            if i>30:
                 break
             data_info = dataset.prepare_train_img(i)
             mAP = eval_fn(result, data_info['ann_info'])
@@ -137,13 +145,14 @@ class ResultVisualizer:
 
         # descending select topk image
         _mAPs = list(sorted(_mAPs.items(), key=lambda kv: kv[1]))
-        good_mAPs = _mAPs[-topk:]
-        bad_mAPs = _mAPs[:topk]
+        self._save_image_gts_results(dataset, results,  _mAPs, show_dir)
+        # good_mAPs = _mAPs[-topk:]
+        # bad_mAPs = _mAPs[:topk]
 
-        good_dir = osp.abspath(osp.join(show_dir, 'good'))
-        bad_dir = osp.abspath(osp.join(show_dir, 'bad'))
-        self._save_image_gts_results(dataset, results, good_mAPs, good_dir)
-        self._save_image_gts_results(dataset, results, bad_mAPs, bad_dir)
+        # good_dir = osp.abspath(osp.join(show_dir, 'good'))
+        # bad_dir = osp.abspath(osp.join(show_dir, 'bad'))
+        # self._save_image_gts_results(dataset, results, good_mAPs, good_dir)
+        # self._save_image_gts_results(dataset, results, bad_mAPs, bad_dir)
 
 
 def parse_args():
@@ -162,14 +171,14 @@ def parse_args():
         help='the interval of show (s), 0 is block')
     parser.add_argument(
         '--topk',
-        default=20,
+        default=100,
         type=int,
         help='saved Number of the highest topk '
         'and lowest topk after index sorting')
     parser.add_argument(
         '--show-score-thr',
         type=float,
-        default=0,
+        default=0.3,
         help='score threshold (default: 0.)')
     parser.add_argument(
         '--cfg-options',
@@ -187,9 +196,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.prediction_path='/home/tju531/hwr/mmdet_works/results/7_atss_r50_fpn_1x_fgvoc/0_raw.pkl'
-    args.config ='/home/tju531/hwr/mmdetection/configs/a_fgvoc/7_atss_r50_fpn_1x_fgvoc.py'
-    args.show_dir = '/home/tju531/hwr/mmdet_works/show_dir/7_atss/raw/'
+    args.prediction_path='/home/tju531/hwr/mmdet_works/pkl_dir/voc_atss.pkl'
+    args.config ='/home/tju531/hwr/mmdet_works/pth_dir/voc_atss_bs4_41.3/voc_atss.py'
+    args.show_dir = '/home/tju531/hwr/mmdet_works/all_det/voc/'
 
     if not osp.exists(args.show_dir):
         os.makedirs(args.show_dir)
@@ -206,7 +215,8 @@ def main():
     cfg.data.test.test_mode = True
 
     cfg.data.test.pop('samples_per_gpu', 0)
-    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.dataset.pipeline)
+    # cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.dataset.pipeline)
+    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.pipeline)
     dataset = build_dataset(cfg.data.test)
     outputs = mmcv.load(args.prediction_path)
 

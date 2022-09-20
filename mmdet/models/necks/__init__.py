@@ -22,11 +22,11 @@ from .CFPN import CFPN
 from .bcfpn import BCFPN
 from .bcfpn_cell import BCFPNC
 from .atten_fpn import ATTENFPN
-from .atten_fuse import ATTENFUSE
+from .lafpn import LAFPN
 from .nbcfpn import NBCFPN
 __all__ = [
     'FPN', 'BFP', 'ChannelMapper', 'HRFPN', 'NASFPN', 'FPN_CARAFE', 'PAFPN',
     'NASFCOS_FPN', 'RFP', 'YOLOV3Neck', 'FPG', 'DilatedEncoder',
     'CTResNetNeck', 'SSDNeck', 'YOLOXPAFPN', 'DyHead','ACFPN','HEBFP','CFPN',
-    'BCFPN','BCFPNC','ATTENFPN','ATTENFUSE','NBCFPN'
+    'BCFPN','BCFPNC','ATTENFPN','LAFPN','NBCFPN'
 ]

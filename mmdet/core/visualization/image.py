@@ -137,7 +137,7 @@ def imshow_det_bboxes(img,
                 f'{label_text}',
                 bbox={
                     'facecolor': '#FFD700',
-                    'alpha': 3,
+                    'alpha': 0.5,
                     'pad': 2,
                     'edgecolor': 'none'
                 },
@@ -152,7 +152,7 @@ def imshow_det_bboxes(img,
                 f'{label_text}',
                 bbox={
                     'facecolor': '#6A5ACD',
-                    'alpha': 3,
+                    'alpha': 0.5,
                     'pad': 2,
                     'edgecolor': 'none'
                 },
@@ -167,7 +167,23 @@ def imshow_det_bboxes(img,
                 f'{label_text}',
                 bbox={
                     'facecolor': '#A020F0',
-                    'alpha': 3,
+                    'alpha': 0.5,
+                    'pad': 2,
+                    'edgecolor': 'none'
+                },
+                color=text_color[label],
+                fontsize=font_size,
+                verticalalignment='top',
+                horizontalalignment='left')
+
+        elif label == 3:
+            ax.text(
+                bbox_int[0],
+                bbox_int[1],
+                f'{label_text}',
+                bbox={
+                    'facecolor': '#D2691E',
+                    'alpha': 0.5,
                     'pad': 2,
                     'edgecolor': 'none'
                 },
@@ -181,8 +197,8 @@ def imshow_det_bboxes(img,
                 bbox_int[1],
                 f'{label_text}',
                 bbox={
-                    'facecolor': '#B0171F',
-                    'alpha': 3,
+                    'facecolor': '#B9E0A5',
+                    'alpha': 0.5,
                     'pad': 2,
                     'edgecolor': 'none'
                 },
@@ -196,8 +212,8 @@ def imshow_det_bboxes(img,
                 bbox_int[1],
                 f'{label_text}',
                 bbox={
-                    'facecolor': '#D2691E',
-                    'alpha': 3,
+                    'facecolor': '#EA6B66',
+                    'alpha': 0.5,
                     'pad': 2,
                     'edgecolor': 'none'
                 },
@@ -247,7 +263,7 @@ def imshow_gt_det_bboxes(img,
                          result,
                          class_names=None,
                          score_thr=0,
-                         vis_det=True,
+                         vis_det=False,
                          vis_gt=True,
                          gt_bbox_color=(255, 102, 61),
                          gt_text_color=(255, 102, 61),

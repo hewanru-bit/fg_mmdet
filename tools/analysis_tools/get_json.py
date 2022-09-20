@@ -26,14 +26,14 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
     parser.add_argument('--config',
-                        default='/home/tju531/hwr/UWdetection/configs/uw_detection/coco_style/retinanet_r50_fpn_1x_uwdet_coco.py',
+                        default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py',
                         help='test config file path')
     parser.add_argument('--pkl',
-                        default='/home/tju531/hwr/UWdetection/result/retinanet_r50_1x_result/0_retinanet_raw.pkl',
+                        default='/home/tju531/hwr/mmdet_works/pkl_dir/atss_edge_bcfpn.pkl',
                         help='checkpoint file')
     parser.add_argument(
         '--save_dir',
-        default='/home/tju531/hwr/UWdetection/demo/',
+        default='/home/tju531/hwr/mmdet_works/tide_dir/',
         help='the directory to save the file containing evaluation metrics')
 
     args = parser.parse_args()
@@ -47,7 +47,7 @@ def main():
     cfg = Config.fromfile(args.config)
     dataset = build_dataset(cfg.data.test)
 
-    json = 'he.bbox.json'
+    json = args.pkl.split('/')[-1].split('.')[0]
     json_name = osp.join(args.save_dir,json)
 
     dataset.format_results(outputs, json_name)

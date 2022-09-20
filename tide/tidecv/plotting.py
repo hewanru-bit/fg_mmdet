@@ -122,9 +122,9 @@ class Plotter():
 
 		for i in range(len(error_val)):
 			name = error_types[i]
-			error_out.append(f'{name}')  # 标签没有数值，只有名字
-			# val = ('%.2f' % error_val[i])
-			# error_out.append(f'{name}:{val}') # 标签 添加数值
+			# error_out.append(f'{name}')  # 标签没有数值，只有名字
+			val = ('%.2f' % error_val[i])
+			error_out.append(f'{name}:{val}') # 标签 添加数值
 
 
 		error_sum = sum([e for e in errors['main'][model_name].values()])
@@ -145,11 +145,11 @@ class Plotter():
 			inner_text[i].set_text(error_out[i])
 			# 字体大小改进地方
 			if 0.025 <= error_sizes[i] < 0.04:
-				inner_text[i].set_fontsize(15)
+				inner_text[i].set_fontsize(10)
 			elif error_sizes[i] < 0.025:
 				inner_text[i].set_fontsize(7)
 			else:
-				inner_text[i].set_fontsize(15)
+				inner_text[i].set_fontsize(10)
 			inner_text[i].set_fontweight('bold')
 
 		# wedges, texts = ax.pie(error_sizes)
@@ -187,10 +187,12 @@ class Plotter():
 		# 						,connectionstyle = "arc3,rad=0.2"))
 		#
 
+		rec_type = 'tide.box'
 		ax.axis('equal')
 		# ax.legend(patches, error_types, loc='upper right')
-		model_name = model_name.split('.')[0]
-		title_name = model_name.split('_')[-1]
+		model_name = model_name.split('.bbox')[0]
+		# title_name = model_name.split('_')[-1]
+		title_name = model_name
 		plt.title(title_name,
 				  fontdict={'fontsize': 30,
 							# 'fontweight': 'bold',

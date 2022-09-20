@@ -23,13 +23,13 @@ from mmdet.utils import setup_multi_processes
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config',default='/home/tju531/hwr/mmdetection/configs/a_fg/4_retinanet_r50_fpn_1x_fgvoc.py',
+    parser.add_argument('--config',default='/home/tju531/hwr/mmdet_works/atss_48.3/atss.py',
                         help='test config file path')
-    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/retinanet_r50_fpn_1x_fgvoc/latest.pth',
+    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/atss_48.3/epoch_12.pkl',
                         help='checkpoint file')
     parser.add_argument(
         '--work-dir',
-        default='/home/tju531/hwr/mmdetection/tools/others/work_dirs/a/',
+        default='/home/tju531/hwr/mmdet_works/tide_dir/',
         help='the directory to save the file containing evaluation metrics')
     parser.add_argument(
         '--tide',
@@ -37,7 +37,7 @@ def parse_args():
         action='store_true',
         help='the directory to save the file containing evaluation metrics')
     parser.add_argument('--out',
-                        default='/home/tju531/hwr/mmdetection/tools/others/results/retinanet_0_raw.pkl',
+                        default='/home/tju531/hwr/mmdet_works/pkl_dir/atss.pkl',  ############
                         help='output result file in pickle format')
     parser.add_argument(
         '--fuse-conv-bn',
@@ -65,7 +65,7 @@ def parse_args():
         'submit it to the test server')
     parser.add_argument(
         '--eval',
-        default='mAP',
+        default='bbox',
         type=str,
         nargs='+',
         help='evaluation metrics, which depends on the dataset, e.g., "bbox",'

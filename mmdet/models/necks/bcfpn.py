@@ -11,9 +11,7 @@ from ..builder import NECKS
 
 @NECKS.register_module()
 class BCFPN(BaseModule):
-    """BFP cfpn的结合
-    先进行fpn中的up to down，并如果输出不够指定层数，增加额外的层，得到通道数相同的num_outs个层。同时在原有的cfpn上增加跳层连接
-    即outs = inputs+w*inputs, down_up参数控制是否进行down to up
+    """
     """
 
     def __init__(self,
@@ -23,7 +21,7 @@ class BCFPN(BaseModule):
                  start_level=0,
                  end_level=-1,
                  add_extra_convs=False,
-                 down_up=False, ####
+                 down_up=True, ####
                  cat_feats=False,
                  shape_level=2,  #平均池化的尺寸与这一层相同
                  pooling_type='AVG',

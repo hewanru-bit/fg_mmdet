@@ -6,10 +6,12 @@ from .anchor_head import AnchorHead
 from ..builder import HEADS, build_loss
 import torch
 import warnings
+import numpy as np
 from mmdet.core import (anchor_inside_flags, build_assigner, build_bbox_coder,
                         build_prior_generator, build_sampler, images_to_levels,
                         multi_apply, unmap)
 import torch.nn.functional as F
+from mmdet.utils import selcet_bboxes
 
 '''在原始的RetinaHead 的基础上添加了 edge 分支'''
 @HEADS.register_module()
@@ -259,8 +261,8 @@ class ARetinaHead(AnchorHead):
                                            num_level_anchors)
 
         ###########求edge loss #########################
-        edge_target = self.edge_target(edge_imgs[0], edge)
-        loss_edge = self.loss_edge(edge_imgs[0], edge_target)
+        loss_edge = self.bbox_edge_loss(edge_imgs, edge, bbox_preds, anchor_list,
+                                        labels_list, gt_bboxes)
 
         losses_cls, losses_bbox = multi_apply(
             self.loss_single,
@@ -272,19 +274,105 @@ class ARetinaHead(AnchorHead):
             bbox_targets_list,
             bbox_weights_list,
             num_total_samples=num_total_samples)
-        return dict(loss_cls=losses_cls, loss_bbox=losses_bbox, loss_edge = loss_edge)
+        return dict(loss_cls=losses_cls, loss_bbox=losses_bbox, loss_edge=loss_edge)
 
 
-      ####得到 边缘的gt
-    def edge_target(self,edge_img, gt_edge):
-        # 1.将gt_edge(b,c,h,w) 下采样到edge_imgs[0]的尺寸
-        ####edge_img,gt_edge 都没有了bz通道
-        w,h = edge_img.size()[2:]
-        gt_edge = F.interpolate(gt_edge, size=(w,h))
-        # for i in range(len(edge_img)):
-        #     ed_shape = edge_img[i].size()[1:]
-        #     gt_edge[i] = F.interpolate(gt_edge[i], size=ed_shape)
-        return gt_edge
+    def bbox_edge_loss(self,edge_imgs,gt_edge, bbox_pred,
+                       anchor, labels, gt_bboxes,getpreedge=0, digmed=True, use_prebbox=True):
+        # getpreedge=0 表示直接使用网络输出的edge_imgs[0]进行操作
+        # getpreedge=1 表示将网络输出的后四层，采样到edge_imgs[0]的尺寸，相加作为edge_img进行后续操作
+        # 重新设置参数，digmed=Ture表示使用扣除，为Fasle表示不扣除
+        # use_prebbox=Ture 表示使用gt——bboxesd 点进行扣除,use_prebbox=False表示用预测的点扣除
+
+        # 1.按照getpreedge的方式得到edge_img
+        if getpreedge:
+            tems=0
+            w, h = edge_imgs[0].size()[2:]
+            for i in range(len(edge_imgs)):
+                tem = F.interpolate(edge_imgs[i], size=(w, h))
+                tems=tems+tem
+            edge_img = tems
+        else:
+            edge_img = edge_imgs[0]
+
+        # 2.按照digmed 是否进行扣除和扣除方式进一布得到edge_preds
+        if digmed:
+            # 必须edge_img 采样到gt——edge尺寸
+            edge_size = self.edge_target(edge_img, gt_edge, sm=0)
+            if use_prebbox:
+                # use_gtbbox=False表示用预测的点扣除
+                # 输入的anchor是bs个list 每个又包含5层list， bbox_pred是先5层，每层有bz个，
+                # 都需要转成bz个list一层，即一张图片所有的anchor 和bboxespred为一个list
+                concat_anchor=[]
+                for i in range(len(anchor)):
+                    concat_anchor.append(torch.cat(anchor[i]))
+
+                # 先把bboxes_pred转成anchor一样的存储方式
+                bboxes_pred_list=[]
+                for i in range(len(anchor)):
+                    sing_bbox_pred=[]
+                    for j in range(len(bbox_pred)):
+                        sing_bbox_pred.append(bbox_pred[j][i].permute(1, 2, 0).reshape(-1,4))
+                    bboxes_pred_list.append(sing_bbox_pred)
+                concat_bboxes_pred = []
+                for i in range(len(bboxes_pred_list)):
+                    concat_bboxes_pred.append(torch.cat(bboxes_pred_list[i]))
+
+                # labels也要转化
+                labels_list = []
+                for i in range(len(anchor)):
+                    sing_labels = []
+                    for j in range(len(labels)):
+                        sing_labels.append(labels[j][i])
+                    labels_list.append(sing_labels)
+                concat_labels = []
+                for i in range(len(labels_list)):
+                    concat_labels.append(torch.cat(labels_list[i]))
+
+                # 单张图片处理
+                edge_digs=[]
+                for i in range(len(concat_labels)):
+                    bg_class_ind = self.num_classes
+                    pos_inds = ((concat_labels[i] >= 0)
+                                & (concat_labels[i] < bg_class_ind)).nonzero().squeeze(1)
+                    if len(pos_inds) > 0:
+                        pos_bbox_pred = concat_bboxes_pred[i][pos_inds]
+                        pos_anchors = concat_anchor[i][pos_inds]
+                        # pos_anchors 是正常坐标，但 pos_bbox_pred是偏移量，先解码
+                        use_bbox=self.bbox_coder.decode(pos_anchors, pos_bbox_pred)
+                        edge_dig = selcet_bboxes(edge_size[i], use_bbox)
+                        edge_digs.append(edge_dig)
+                edge_pred = torch.stack(edge_digs,dim=0)
+            else:
+                edge_digs = []
+                for i in range(len(gt_bboxes)):
+                    edge_dig = selcet_bboxes(edge_size[i], gt_bboxes[i])
+                    edge_digs.append(edge_dig)
+                edge_pred = torch.stack(edge_digs, dim=0)
+            loss_edge = self.loss_edge(edge_pred, gt_edge)
+        else:
+            # 不扣除bbox,sm=0,edge_img采样到gt——edge大小返回edge_size
+            edge_size = self.edge_target(edge_img, gt_edge, sm=0)
+            loss_edge = self.loss_edge(edge_size, gt_edge)
+
+            # gt_edge才样至edge_img，返回edge_target
+            # edge_target = self.edge_target(edge_img, gt_edge, sm=1)
+            # loss_edge = self.loss_edge(edge_img, edge_target)
+
+        return loss_edge
+
+    def edge_target(self,edge_img, gt_edge, sm=1):
+        if sm ==1:
+            # 1.将gt_edge(b,c,h,w) 下采样到edge_imgs[0]的尺寸
+            ####edge_img,gt_edge 都没有了bz通道
+            w,h = edge_img.size()[2:]
+            gt_edge = F.interpolate(gt_edge, size=(w,h))
+            return gt_edge
+        else:
+            # 2.将edge_img上采样到gt_edge的尺寸
+            w, h = gt_edge.size()[2:]
+            edge_pre = F.interpolate(edge_img, size=(w, h))
+            return edge_pre
 
     def simple_test_bboxes(self,feats, img_metas, rescale=False):
         """Test det bboxes without test-time augmentation, can be applied in

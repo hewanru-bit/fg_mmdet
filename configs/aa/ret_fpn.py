@@ -1,5 +1,6 @@
 _base_ = [
     '../_base_/datasets/fgcoco_detection.py',
+    # '../_base_/datasets/fgvoc_coco.py',
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
              #   '''retinanet_r50_fpn原始设置'''

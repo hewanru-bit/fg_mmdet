@@ -376,8 +376,8 @@ class CATSSHead(AnchorHead):
                 num_total_samples=num_total_samples)
 
         ###########求edge loss #########################
-        edge_target = self.edge_target(edge_imgs[0], edge)
-        loss_edge = self.loss_edge(edge_imgs[0], edge_target)
+        edge_size = self.edge_target(edge_imgs[0], edge)
+        loss_edge = self.loss_edge(edge_size, edge)
 
 
         bbox_avg_factor = sum(bbox_avg_factor)
@@ -412,12 +412,12 @@ class CATSSHead(AnchorHead):
     def edge_target(self,edge_img, gt_edge):
         # 1.将gt_edge(b,c,h,w) 下采样到edge_imgs[0]的尺寸
         ####edge_img,gt_edge 都没有了bz通道
-        w,h = edge_img.size()[2:]
-        gt_edge = F.interpolate(gt_edge, size=(w,h))
+        w,h = gt_edge.size()[2:]
+        edge_size = F.interpolate(edge_img, size=(w,h))
         # for i in range(len(edge_img)):
         #     ed_shape = edge_img[i].size()[1:]
         #     gt_edge[i] = F.interpolate(gt_edge[i], size=ed_shape)
-        return gt_edge
+        return edge_size
 
 
     def get_targets(self,

@@ -78,7 +78,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='GetEdge',only_bbox=False),  ### only_bbox = Ture 是只求bbox中 目标的边缘，Fasle时求整张图片的边缘
+    dict(type='GetEdge',only_bbox=True),  ### only_bbox = True 是只求bbox中 目标的边缘，Fasle时求整张图片的边缘
     dict(type='Resize', img_scale=(640, 640), keep_ratio=True),# img_scale=(1000, 600)
     dict(type='RandomFlip', flip_ratio=0.5),
     dict(type='Normalize', **img_norm_cfg),   # gt_edge - > 如果不行 mean = [128,] std = [1]

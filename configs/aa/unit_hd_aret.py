@@ -72,6 +72,7 @@ model = dict(
 
 dataset_type = 'FGCocoDataset'
 data_root = '/home/tju531/hwr/Datasets/RESIDE/RTTS/'
+dcp_root ='/home/tju531/hwr/Datasets/RESIDE/RTTS/DCP/'
 img_norm_cfg = dict(
     mean=[[123.675, 116.28, 103.53],128], std=[[58.395, 57.12, 57.375],57.12], to_rgb=True)
 
@@ -113,9 +114,8 @@ train_dataset = dict(
     dataset=dict(
         type=dataset_type,
         ann_file=[data_root + 'rtts_coco/rtts_train.json',
-                  data_root + 'rtts_coco/he_train.json',
-                  data_root + 'rtts_coco/msrcp_train.json'],
-        img_prefix=[data_root, data_root, data_root],
+                  data_root + 'rtts_coco/dcp_train.json'],
+        img_prefix=[data_root,dcp_root],
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True)
@@ -149,7 +149,7 @@ evaluation = dict(
     save_best='auto',
     interval=interval,
     metric='bbox')  # VOC类型的可选： 'mAP', 'recall'，COCO类型可选proposal，bbox
-log_config = dict(interval=100) # 打印Log信息的间隔
+log_config = dict(interval=10) # 打印Log信息的间隔
 
 runner = dict(type='EpochBasedRunner', max_epochs=12)
 

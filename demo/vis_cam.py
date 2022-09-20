@@ -9,6 +9,7 @@ from mmcv import Config, DictAction
 
 from mmdet.utils.det_cam_visualizer import (DetAblationLayer,
                                             DetBoxScoreTarget, DetCAMModel,
+                                            # edgeDetCAMModel,
                                             DetCAMVisualizer, EigenCAM,
                                             FeatmapAM, reshape_transform)
 
@@ -39,11 +40,19 @@ ALL_METHODS = list(GRAD_FREE_METHOD_MAP.keys() | GRAD_BASE_METHOD_MAP.keys())
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Visualize CAM')
-    parser.add_argument('--img',default='/home/tju531/hwr/mmdetection/demo/2.png', help='Image file')
-    parser.add_argument('--config', default='/home/tju531/hwr/mmdetection/configs/a_fgvoc/1_faster_rcnn_r50_fpn_1x_fgvoc.py',help='Config file')
-    parser.add_argument('--checkpoint',default='/home/tju531/hwr/mmdet_work/work_dirs/faster_r50_fpn_1x_fgvoc/latest.pth',
+    parser.add_argument('--img',default='/home/tju531/hwr/mmdetection/demo/1.png', help='Image file')
+    parser.add_argument('--config',
+                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_48.3/atss.py',
+                        default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py',
+                        help='Config file')
+    parser.add_argument('--checkpoint',
+                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_48.3/epoch_12.pth',
+                        default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/epoch_12.pth',
                         help='Checkpoint file')
-    parser.add_argument('--out-dir', default=None, help='dir to output file')
+    parser.add_argument('--out-dir',
+                        # default='./cam_results/atss_bklayer3',
+                        default='./cam_results/our_bklayer3',
+                        help='dir to output file')
     parser.add_argument(
         '--method',
         default='gradcam',
@@ -68,7 +77,7 @@ def parse_args():
     parser.add_argument(
         '--topk',
         type=int,
-        default=10,
+        default=5,
         help='Topk of the predicted result to visualizer')
     parser.add_argument(
         '--max-shape',
