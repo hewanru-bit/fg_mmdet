@@ -21,6 +21,7 @@ from .fgcoco import FGCocoDataset
 from .udvoc import UDVOCDataset
 from .uwcoco import UWCocoDataset
 from .voc_coco import VOCCocoDataset
+from .city_voc import CITY_VOCDataset
 __all__ = [
     'CustomDataset', 'XMLDataset', 'CocoDataset', 'DeepFashionDataset',
     'VOCDataset', 'CityscapesDataset', 'LVISDataset', 'LVISV05Dataset',
@@ -30,5 +31,5 @@ __all__ = [
     'build_dataset', 'replace_ImageToTensor', 'get_loading_pipeline',
     'NumClassCheckHook', 'CocoPanopticDataset', 'MultiImageMixDataset',
     'OpenImagesDataset', 'OpenImagesChallengeDataset','FGVOCDataset','FGCocoDataset',
-    'UDVOCDataset','UWCocoDataset','VOCCocoDataset'
+    'UDVOCDataset','UWCocoDataset','VOCCocoDataset','CITY_VOCDataset'
 ]

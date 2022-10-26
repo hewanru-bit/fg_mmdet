@@ -42,12 +42,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Visualize CAM')
     parser.add_argument('--img',default='/home/tju531/hwr/mmdetection/demo/1.png', help='Image file')
     parser.add_argument('--config',
-                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_48.3/atss.py',
-                        default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py',
+                        default='/home/tju531/hwr/mmdetection/configs/aa/atss.py',
+                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py',
                         help='Config file')
     parser.add_argument('--checkpoint',
-                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_48.3/epoch_12.pth',
-                        default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/epoch_12.pth',
+                        default='/home/tju531/hwr/mmdet_works/atss_48.3/epoch_12.pth',
+                        # default='/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/epoch_12.pth',
                         help='Checkpoint file')
     parser.add_argument('--out-dir',
                         # default='./cam_results/atss_bklayer3',

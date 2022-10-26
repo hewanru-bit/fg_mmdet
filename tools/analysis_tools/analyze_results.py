@@ -92,17 +92,26 @@ class ResultVisualizer:
                 data_info,
                 results[index],
                 dataset.CLASSES,
-                gt_bbox_color=(234, 107, 102),  # 红色 #EA6B66
+                vis_det=True,
+                vis_gt=False,
+                gt_bbox_color= (210, 105, 30),
                 gt_text_color=(255, 255, 255),
-                gt_mask_color=(128, 42, 42),
-                # 金黄色 #FFD700，石板蓝 #6A5ACD，紫色 #A020F0，巧克力色 #D2691E    # 绿色 # B9E0A5
-                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (210, 105, 30),(185,224,165)],
-                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
-                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (210, 105, 30),(185,224,165)],
+                gt_mask_color=(210, 105, 30),
+                det_bbox_color=[(238,130,238),(255,192,203),(138,43,226),(65,105,225),(0,255,255),(60,179,113),(255,215,0),(255,99,71)],
+                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
+                det_mask_color=[(238,130,238),(255,192,203),(138,43,226),(65,105,225),(0,255,255),(60,179,113),(255,215,0),(255,99,71)],
                 show=self.show,
                 score_thr=self.score_thr,
                 wait_time=self.wait_time,
                 out_file=out_file)
+            '''
+            [(238,130,238),(255,192,203),(138,43,226),(65,105,225),(0,255,255),(60,179,113),(255,215,0),(255,99,71)],
+            紫罗兰 #EE82EE (238,130,238)    粉红 # FFB6C1 (255,192,203)
+            蓝紫 # 8A2BE2(138,43,226)      黄家蓝 # 4169E1 (65,105,225)
+            青色 # 00FFFF (0,255,255)      绿色 #3CB371 (60,179,113)
+            金 # FFD700 (255,215,0)       番茄 # FF6347 (255,99,71)
+
+            '''
 
     def evaluate_and_show(self,
                           dataset,
@@ -136,8 +145,8 @@ class ResultVisualizer:
         for i, (result, ) in enumerate(zip(results)):
             # self.dataset[i] should not call directly
             # because there is a risk of mismatch
-            if i>30:
-                break
+            # if i>30:
+            #     break
             data_info = dataset.prepare_train_img(i)
             mAP = eval_fn(result, data_info['ann_info'])
             _mAPs[i] = mAP
@@ -145,13 +154,13 @@ class ResultVisualizer:
 
         # descending select topk image
         _mAPs = list(sorted(_mAPs.items(), key=lambda kv: kv[1]))
-        self._save_image_gts_results(dataset, results,  _mAPs, show_dir)
-        # good_mAPs = _mAPs[-topk:]
+        # self._save_image_gts_results(dataset, results,  _mAPs, show_dir)
+        good_mAPs = _mAPs[-topk:]
         # bad_mAPs = _mAPs[:topk]
 
-        # good_dir = osp.abspath(osp.join(show_dir, 'good'))
+        good_dir = osp.abspath(osp.join(show_dir, 'good'))
         # bad_dir = osp.abspath(osp.join(show_dir, 'bad'))
-        # self._save_image_gts_results(dataset, results, good_mAPs, good_dir)
+        self._save_image_gts_results(dataset, results, good_mAPs, good_dir)
         # self._save_image_gts_results(dataset, results, bad_mAPs, bad_dir)
 
 
@@ -171,7 +180,7 @@ def parse_args():
         help='the interval of show (s), 0 is block')
     parser.add_argument(
         '--topk',
-        default=100,
+        default=50,
         type=int,
         help='saved Number of the highest topk '
         'and lowest topk after index sorting')
@@ -196,9 +205,9 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.prediction_path='/home/tju531/hwr/mmdet_works/pkl_dir/voc_atss.pkl'
-    args.config ='/home/tju531/hwr/mmdet_works/pth_dir/voc_atss_bs4_41.3/voc_atss.py'
-    args.show_dir = '/home/tju531/hwr/mmdet_works/all_det/voc/'
+    args.prediction_path = '/home/tju531/hwr/work_dirs/pkl_dir/city_atss_r101_31.0.pkl'
+    args.config = '/home/tju531/hwr/work_dirs/pkl_dir/city_atss_r101_31.0.py'
+    args.show_dir = '/home/tju531/hwr/work_dirs/results/city_atss/'
 
     if not osp.exists(args.show_dir):
         os.makedirs(args.show_dir)
@@ -215,8 +224,8 @@ def main():
     cfg.data.test.test_mode = True
 
     cfg.data.test.pop('samples_per_gpu', 0)
-    # cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.dataset.pipeline)
-    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.pipeline)
+    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.dataset.pipeline)
+    # cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.pipeline)
     dataset = build_dataset(cfg.data.test)
     outputs = mmcv.load(args.prediction_path)
 

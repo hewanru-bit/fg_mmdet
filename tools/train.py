@@ -24,11 +24,11 @@ from mmdet.utils import (collect_env, get_root_logger, setup_multi_processes,
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
     parser.add_argument(
-    '--config', default = '/home/tju531/hwr/mmdet2.0/mmdetection/configs/aa/atss_edge_bcfpn.py',
+    '--config', default = '/home/tju531/hwr/mmdet2.0/mmdetection/configs/aa/edffnet.py',
     # '--config', default='/home/tju531/hwr/mmdetection/configs/a_fgcoco/0_atss_r50_fpn_fgcoco.py',
                         help='train config file path')
     parser.add_argument('--work-dir',
-    default='/home/tju531/hwr/mmdet_works/try/reppoints_edge_bcfpn/',
+                        default='/home/tju531/hwr/mmdet_works/edffnet/',
                         help='the dir to save logs and models')
     parser.add_argument(
         '--resume-from',

@@ -40,7 +40,7 @@ class SEAttention(nn.Module):
 
 if __name__ == '__main__':
     input = torch.randn(5, 512, 7, 7)
-    se = SEAttention(channel=512, reduction=8)
+    se = SEAttention(channel=512,out_channel=5, reduction=8)
     output = se(input)
     print(output.shape)
 

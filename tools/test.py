@@ -23,15 +23,17 @@ from mmdet.utils import setup_multi_processes, update_data_root
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
-    parser.add_argument('--config', default = '/home/tju531/hwr/mmdet_works/pth_dir/voc_atss_bs4_41.3/voc_atss.py'
-                        ,help = 'test config file path')
-    parser.add_argument('--checkpoint', default='/home/tju531/hwr/mmdet_works/pth_dir/voc_atss_bs4_41.3/epoch_12.pth',
+    parser.add_argument('--config',
+                        default = '/home/tju531/hwr/work_dirs/a_city_noid_r101_1333_800_10e_47.5/city_edffnet.py',
+                        help = 'test config file path')
+    parser.add_argument('--checkpoint',
+                        default='/home/tju531/hwr/work_dirs/a_city_noid_r101_1333_800_10e_47.5/best_mAP_epoch_7.pth',
                         help='checkpoint file')
     parser.add_argument(
         '--work-dir',
         help='the directory to save the file containing evaluation metrics')
     parser.add_argument('--out',
-                        default='/home/tju531/hwr/mmdet_works/pkl_dir/voc_atss.pkl',
+                        default='/home/tju531/hwr/work_dirs/pkl_dir/city_edffnet_r101_1333_800_47.5.pkl',
                         help='output result file in pickle format')
     parser.add_argument(
         '--fuse-conv-bn',
@@ -58,7 +60,7 @@ def parse_args():
         'submit it to the test server')
     parser.add_argument(
         '--eval',
-        default='bbox',
+        default='mAP',
         type=str,
         nargs='+',
         help='evaluation metrics, which depends on the dataset, e.g., "bbox",'

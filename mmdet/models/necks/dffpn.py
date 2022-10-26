@@ -1,39 +1,38 @@
 # -*-coding:utf-8-*-
 import copy
 import torch
+from typing import List, Tuple, Union
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
-
+from torch import Tensor
 from ..builder import NECKS
 
 
+
 @NECKS.register_module()
-class BCFPN(BaseModule):
+class DFFPN(BaseModule):
     """
     """
 
     def __init__(self,
-                 in_channels,# [256, 512, 1024, 2048]
-                 out_channels,  # 256
-                 num_outs=5,
-                 start_level=0,
-                 end_level=-1,
-                 add_extra_convs=False,
-                 down_up=True, ####
-                 cat_feats=False,
-                 shape_level=2,  #平均池化的尺寸与这一层相同
-                 pooling_type='AVG',
-                 relu_before_extra_convs=False,
-                 conv_cfg=None,
-                 norm_cfg=None,
-                 act_cfg=None,
-                 no_norm_on_lateral=False,
+                 in_channels: List[int],
+                 out_channels: int = 256,
+                 num_outs: int = 5,
+                 start_level: int = 0,
+                 end_level: int = -1,
+                 add_extra_convs = False,
+                 shape_level: int = 2,
+                 relu_before_extra_convs = False,
+                 no_norm_on_lateral = False,
+                 conv_cfg = None,
+                 norm_cfg = None,
+                 act_cfg = None,
                  upsample_cfg=dict(mode='nearest'),
                  init_cfg=dict(
                      type='Xavier', layer='Conv2d', distribution='uniform')):
-        super(BCFPN, self).__init__(init_cfg)
+        super(DFFPN, self).__init__(init_cfg)
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -45,9 +44,7 @@ class BCFPN(BaseModule):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.upsample_cfg = upsample_cfg.copy()
-        self.down_up = down_up
         self.relu_before_extra_convs =relu_before_extra_convs
-        self.cat_feats = cat_feats
 
         if end_level == -1:
             self.backbone_end_level = self.num_ins
@@ -71,7 +68,7 @@ class BCFPN(BaseModule):
         self.d_p = nn.ModuleList()
         self.fpn_convs = nn.ModuleList()
         self.fpl_convs = nn.ModuleList()
-        self.fc = nn.Sequential(nn.AdaptiveAvgPool2d(1),
+        self.dff = nn.Sequential(nn.AdaptiveAvgPool2d(1),
                                 nn.Conv2d(self.out_channels*self.num_outs, self.num_outs, 1)
                                 )
         for i in range(self.start_level, self.backbone_end_level):
@@ -116,23 +113,7 @@ class BCFPN(BaseModule):
                 inplace=False)
             self.fpl_convs.append(fl_conv)
             self.d_p.append(dp_conv)
-
-        if self.cat_feats:
-            self.fp1_convs = ConvModule(
-                    out_channels*self.num_outs,
-                    out_channels,
-                    3,
-                    stride=1,
-                    padding=1,
-                    conv_cfg=conv_cfg,
-                    norm_cfg=norm_cfg,
-                    act_cfg=act_cfg,
-                    inplace=False)
-
-        if pooling_type == 'MAX':
-            self.pooling = F.max_pool2d
-        else:
-            self.pooling = F.adaptive_avg_pool2d  ##自适应全局平均池
+        self.pooling = F.adaptive_avg_pool2d
 
         # add extra conv layers (e.g., RetinaNet)
         extra_levels = num_outs - self.backbone_end_level + self.start_level
@@ -209,54 +190,23 @@ class BCFPN(BaseModule):
 
         t_out = torch.cat(t_outs, dim=1)
         # 4.用nn.AdaptiveAvgPool2d(1)+ 1×1卷积代替全连接层得到各层的权重
-        ws = self.fc(t_out)
+        ws = self.dff(t_out)
         ws = torch.sigmoid(ws)  # # 映射到0 -1 范围
         # # 对ws 按照通道数进行分离 b,1,1,1
         w = torch.split(ws, 1, dim=1)
 
         inner_outs = []
-        # 如果得到one_feature再进行pooling        
-        if self.cat_feats:
-            for i in range(0, self.num_outs):
-                inner_outs.append(t_outs[i]*w[i])
-            # torch .cat 得到一层特征，用于之后的poling
-            one_feat = torch.cat(inner_outs,dim=1)
-            # 将one_feat channels b*num_out--->b
-            one_feat = self.fp1_convs(one_feat)
-            # 6. 将one_feat pool分别得到各层的分辨率同时加上inputs
-            tmps = []
-            for i in range(0, self.num_outs):
-                out_size = laterals[i].size()[2:]
-                # tmp=self.pooling(one_feat, output_size=out_size)
-                tmp = F.interpolate(one_feat, size=out_size, **self.upsample_cfg)
-                # tmp = tmp+laterals[i]
-                tmps.append(tmp)
-        else:
-            # 每层与对应的权重进行相乘
-            for i in range(0, self.num_outs):
-                inner_outs.append(laterals[i] * w[i])
-            tmps = inner_outs
 
-        # 如果down_up is ture 就进行down to up
-        if self.down_up:
-            # up-down
-            # for i in range(self.num_outs-1, 0, -1):
-            #     prev_shape = tmps[i - 1].shape[2:]
-            #     tmps[i - 1] = tmps[i - 1] + F.interpolate(
-            #         tmps[i], size=prev_shape, **self.upsample_cfg)
-            #
-            # tmps = [self.d_p[i](tmps[i]) for i in range(self.num_outs)]
-            # down_up
-            for i in range(self.num_outs-1):
-                prev_shape = tmps[i + 1].shape[2:]
-                tmps[i + 1] = tmps[i + 1] + F.interpolate(
-                    tmps[i],size=prev_shape, **self.upsample_cfg)
+        for i in range(0, self.num_outs):
+            inner_outs.append(laterals[i] * w[i])
 
+        for i in range(self.num_outs-1):
+            prev_shape = inner_outs[i + 1].shape[2:]
+            inner_outs[i + 1] = inner_outs[i + 1] + F.interpolate(
+                inner_outs[i],size=prev_shape, **self.upsample_cfg)
 
-        # 7.指定使用的层,经过卷积存储
-        # part 1: from original levels
         outs = [
-            self.fpl_convs[i](tmps[i]+laterals[i]) for i in range(self.num_outs)
+            self.fpl_convs[i](inner_outs[i]+laterals[i]) for i in range(self.num_outs)
         ]
 
         return tuple(outs)

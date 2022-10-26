@@ -375,10 +375,18 @@ class CATSSHead(AnchorHead):
                 bbox_targets_list,
                 num_total_samples=num_total_samples)
 
-        ###########求edge loss #########################
-        edge_size = self.edge_target(edge_imgs[0], edge)
-        loss_edge = self.loss_edge(edge_size, edge)
+        # ###########求edge loss #########################
+        # edge_gt = self.edge_target(edge_imgs[0], edge)
+        # loss_edge = self.loss_edge(edge_imgs[0], edge_gt)
 
+        ###########求edge loss #########################
+        loss_edge = 0
+        for i in range(len(edge_imgs)):
+            edge_target = self.edge_target(edge_imgs[i], edge)
+            loss_e = self.loss_edge(edge_imgs[i], edge_target)
+            loss_edge += loss_e
+
+        loss_edge = loss_edge / 5
 
         bbox_avg_factor = sum(bbox_avg_factor)
         bbox_avg_factor = reduce_mean(bbox_avg_factor).clamp_(min=1).item()
@@ -412,12 +420,12 @@ class CATSSHead(AnchorHead):
     def edge_target(self,edge_img, gt_edge):
         # 1.将gt_edge(b,c,h,w) 下采样到edge_imgs[0]的尺寸
         ####edge_img,gt_edge 都没有了bz通道
-        w,h = gt_edge.size()[2:]
-        edge_size = F.interpolate(edge_img, size=(w,h))
+        w,h = edge_img.size()[2:]
+        edge_gt = F.interpolate(gt_edge, size=(w,h))
         # for i in range(len(edge_img)):
         #     ed_shape = edge_img[i].size()[1:]
         #     gt_edge[i] = F.interpolate(gt_edge[i], size=ed_shape)
-        return edge_size
+        return edge_gt
 
 
     def get_targets(self,

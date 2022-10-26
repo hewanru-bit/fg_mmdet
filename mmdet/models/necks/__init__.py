@@ -20,13 +20,12 @@ from .acfpn import ACFPN
 from .hebfp import HEBFP
 from .CFPN import CFPN
 from .bcfpn import BCFPN
-from .bcfpn_cell import BCFPNC
+from .dffpn import DFFPN
 from .atten_fpn import ATTENFPN
-from .lafpn import LAFPN
-from .nbcfpn import NBCFPN
+
 __all__ = [
     'FPN', 'BFP', 'ChannelMapper', 'HRFPN', 'NASFPN', 'FPN_CARAFE', 'PAFPN',
     'NASFCOS_FPN', 'RFP', 'YOLOV3Neck', 'FPG', 'DilatedEncoder',
     'CTResNetNeck', 'SSDNeck', 'YOLOXPAFPN', 'DyHead','ACFPN','HEBFP','CFPN',
-    'BCFPN','BCFPNC','ATTENFPN','LAFPN','NBCFPN'
+    'BCFPN','DFFPN','ATTENFPN'
 ]

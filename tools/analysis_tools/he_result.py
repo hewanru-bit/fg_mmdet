@@ -116,8 +116,8 @@ class ResultVisualizer:
         i=0
         for index, (result,) in enumerate(zip(results)):
             i+=1
-            if i>9:
-                break
+            # if i>9:
+            #     break
 
             if show_index is not None:
                 assert len(show_index) > 0
@@ -141,18 +141,27 @@ class ResultVisualizer:
                 dataset.CLASSES,
                 vis_det=vis_det,
                 vis_gt=vis_gt,
-                gt_bbox_color=(210, 105, 30),  # 巧克力色 #D2691E
+                gt_bbox_color=(210, 105, 30),
                 gt_text_color=(255, 255, 255),
-                gt_mask_color=(128, 42, 42),
-                # 金黄色 #FFD700，石板蓝 #6A5ACD，紫色 #A020F0，印度红 #B0171F
-                det_bbox_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31), (135, 162, 86)],
-                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
-                det_mask_color=[(255, 215, 0), (106, 90, 205), (160, 32, 240), (176, 23, 31), (135, 162, 86)],
+                gt_mask_color=(210, 105, 30),
+                det_bbox_color=[(238, 130, 238), (255, 192, 203), (138, 43, 226), (65, 105, 225), (0, 255, 255),
+                                (60, 179, 113), (255, 215, 0), (255, 99, 71)],
+                det_text_color=[(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255),
+                                (255, 255, 255), (255, 255, 255), (255, 255, 255)],
+                det_mask_color=[(238, 130, 238), (255, 192, 203), (138, 43, 226), (65, 105, 225), (0, 255, 255),
+                                (60, 179, 113), (255, 215, 0), (255, 99, 71)],
                 show=self.show,
                 score_thr=self.score_thr,
                 wait_time=self.wait_time,
                 out_file=out_file)
+            '''
+                      [(238,130,238),(255,192,203),(138,43,226),(65,105,225),(0,255,255),(60,179,113),(255,215,0),(255,99,71)],
+                      紫罗兰 #EE82EE (238,130,238)    粉红 # FFB6C1 (255,192,203)
+                      蓝紫 # 8A2BE2(138,43,226)      黄家蓝 # 4169E1 (65,105,225)
+                      青色 # 00FFFF (0,255,255)      绿色 #3CB371 (60,179,113)
+                      金 # FFD700 (255,215,0)       番茄 # FF6347 (255,99,71)
 
+                      '''
             prog_bar.update()
 
 
@@ -197,11 +206,21 @@ def parse_args():
 
 def main():
     args = parse_args()
-    args.prediction_path = '/home/tju531/hwr/mmdet_works/pkl_dir/atss_edge_bcfpn.pkl'
-    args.config = '/home/tju531/hwr/mmdet_works/pth_dir/atss_edge_bcfpn_50.7/atss_edge_bcfpn.py'
-    args.show_dir = '/home/tju531/hwr/mmdet_works/results/atss_edge_bcfpn/gt/'
-    # select_img = ['000050.jpg','001596.jpg',]  # 5,20
-    select_img = None
+    args.prediction_path ='/home/tju531/hwr/work_dirs/pkl_dir/city_atss_r101_ours.pkl'
+    args.config = '/home/tju531/hwr/work_dirs/city_atss_fpn_r101_bt_w_edge_39.9/city_atss_fpn_bt_w_edge.py'
+    args.show_dir = '/home/tju531/hwr/work_dirs/results/city_atss/GT/'
+    # select_img = ['target_munster_000100_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_lindau_000048_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_munster_000116_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_frankfurt_000001_053102_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_munster_000166_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_frankfurt_000000_011810_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_frankfurt_000001_056580_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_lindau_000000_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_lindau_000025_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               'target_munster_000159_000019_leftImg8bit_foggy_beta_0.02.jpg',
+    #               ]
+    # select_img = None
 
     cfg = Config.fromfile(args.config)
     mmcv.check_file_exist(args.prediction_path)
@@ -211,11 +230,11 @@ def main():
     cfg.data.test.test_mode = True
 
     cfg.data.test.pop('samples_per_gpu', 0)
-    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.pipeline)
+    cfg.data.test.pipeline = get_loading_pipeline(cfg.data.train.dataset.pipeline)
     dataset = build_dataset(cfg.data.test)
     outputs = mmcv.load(args.prediction_path)
 
-    #  visualize only the selected images
+     # # visualize only the selected images
     # infos = dataset.data_infos
     # index = []
     # for i, info in enumerate(infos):
@@ -226,7 +245,7 @@ def main():
     result_visualizer = ResultVisualizer(args.show, args.wait_time,
                                          args.show_score_thr)
     result_visualizer.evaluate_and_show(
-        dataset, outputs, topk=args.topk, vis_det=True, vis_gt=False,
+        dataset, outputs, topk=args.topk, vis_det=False, vis_gt=True,
         show_dir=args.show_dir, show_index=None)
 
 

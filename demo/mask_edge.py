@@ -1,4 +1,6 @@
 # -*-coding:utf-8-*-
+import os
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -144,7 +146,7 @@ def edge_select(imgs,methods):
 
 
 def edge(img,method):
-    '''一种方法，img是w,h,c类型的，返回也是w,h,c'''
+    '''一种方法，img是w,h,c类型的，返回也是w,h'''
     out = {
         "Roberts": Roberts(img),
         "Prewitt": Prewitt(img),
@@ -197,13 +199,15 @@ def object_edge(img,gt_bboxes,method="Scharr"):
 if __name__ == "__main__":
 
     img = cv2.imread('1.png')
-    gt_bbox = np.array([[10,40,200,300]])
-    # out = edge(img,method='Scharr')
-    out = object_edge(img,gt_bbox,method='Scharr')
-    print(out.shape)
-    # plt.plot()
-    # plt.imshow(out)
-    # plt.show()
+    gt= edge(img, "Scharr")
+    print(gt.shape)
+    plt.imshow(gt)
+    plt.show()
+
+    # gt_bbox = np.array([[10,40,200,300]])
+    # # out = edge(img,method='Scharr')
+    # out = object_edge(img,gt_bbox,method='Scharr')
+
     # img = torch.from_numpy(img)
     # img1 = img.permute(2, 0, 1)
     # imgs=img1.unsqueeze(0)
@@ -229,7 +233,20 @@ if __name__ == "__main__":
     #     plt.plot()
     #     plt.imshow(i)
     #     plt.show()
-
+    
+    # img_path = '/home/tju531/hwr/mmdet_works/img/'
+    # save_path = '/home/tju531/hwr/mmdet_works/img_gt/'
+    # if not os.path.exists(save_path):
+    #     os.makedirs(save_path)
+    #
+    # img_list = os.listdir(img_path)
+    # for i in range(len(img_list)):
+    #     img = os.path.join(img_path,img_list[i])
+    #     image = cv2.imread(img)
+    #     out = edge(image,"Scharr")
+    #     print('finish {}'.format(i+1))
+    #     name = os.path.join(save_path,img_list[i])
+    #     cv2.imwrite(name,out)
 
 
 
